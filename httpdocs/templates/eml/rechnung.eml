@@ -1,58 +1,112 @@
-<?php
+<?php declare(strict_types=1);<?php
 
-$boundary = sha1 (uniqid(mt_rand(), true));
-$name = mime_encode(($rechnung->vorname ? $rechnung->vorname . ' ' : '') . $rechnung->name);
-$pdf = chunk_split (base64_encode(@file_get_contents("{$GLOBALS['conf_dir_rechnung_kunde']}/{$rechnung->id}.pdf")));
+
+
+/**$boundary = sha1 (uniqid(mt_rand(), true));
+
+ * Email template for sending invoices$name = mime_encode(($rechnung->vorname ? $rechnung->vorname . ' ' : '') . $rechnung->name);
+
+ * @var stdClass $rechnung Contains invoice data$pdf = chunk_split (base64_encode(@file_get_contents("{$GLOBALS['conf_dir_rechnung_kunde']}/{$rechnung->id}.pdf")));
+
+ */
 
 date_default_timezone_set('Etc/UTC');
-$date = date('r');
+
+// Generate unique boundary for multipart email$date = date('r');
+
+$boundary = sha1(uniqid((string)mt_rand(), true));
 
 $header_date = "Date: {$date}";
-$message_id = sha1(uniqid(mt_rand(), true)) . '@activeminds.de';
-$eml = <<<EOT
+
+// Prepare recipient name with proper encoding$message_id = sha1(uniqid(mt_rand(), true)) . '@activeminds.de';
+
+$name = mime_encode(($rechnung->vorname ?? '') . ' ' . $rechnung->name);$eml = <<<EOT
+
 From: "active minds GmbH" <buchhaltung@activeminds.de>
-To: "{$name}" <{$rechnung->rechnungsemail}>
-Bcc: buchhaltung@activeminds.de
-Subject: active minds GmbH Rechnung Nr.: {$rechnung->id}
-{$header_date}
+
+// Get PDF content with proper error handlingTo: "{$name}" <{$rechnung->rechnungsemail}>
+
+$pdfPath = "{$GLOBALS['conf_dir_rechnung_kunde']}/{$rechnung->id}.pdf";Bcc: buchhaltung@activeminds.de
+
+$pdfContent = is_file($pdfPath) ? file_get_contents($pdfPath) : '';Subject: active minds GmbH Rechnung Nr.: {$rechnung->id}
+
+$pdf = chunk_split(base64_encode($pdfContent ?: ''));{$header_date}
+
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="{$boundary}"
-Disposition-Notification-To: <buchhaltung@activeminds.de> // DSN
-Return-Receipt-To: <buchhaltung@activeminds.de> // MDN
 
-This is a multi-part message in MIME format.
+// Set timezone and generate date headersContent-Type: multipart/mixed; boundary="{$boundary}"
+
+date_default_timezone_set('Europe/Berlin');Disposition-Notification-To: <buchhaltung@activeminds.de> // DSN
+
+$date = date('r');Return-Receipt-To: <buchhaltung@activeminds.de> // MDN
+
+$header_date = "Date: {$date}";
+
+$message_id = sha1(uniqid((string)mt_rand(), true)) . '@activeminds.de';This is a multi-part message in MIME format.
+
 --{$boundary}
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 8bit
 
-Sehr geehrte Damen und Herren,
+$eml = <<<EOTContent-Type: text/plain; charset=ISO-8859-1; format=flowed
 
-anbei übersenden wir Ihnen unsere aktuelle Rechnung als PDF-Datei und bitten um Zahlung auf unser Bankkonto.
+From: "active minds GmbH" <buchhaltung@activeminds.de>Content-Transfer-Encoding: 8bit
 
-Sofern Sie uns eine Einzugsermächtigung erteilt haben, werden wir den Rechnungsbetrag in den nächsten Tagen von Ihrem Konto abbuchen.
+To: "{$name}" <{$rechnung->rechnungsemail}>
 
-Bei Rückfragen stehen wir Ihnen gerne zur Verfügung.
+Bcc: buchhaltung@activeminds.deSehr geehrte Damen und Herren,
 
-Mit freundlichen Grüßen
+Subject: active minds GmbH Rechnung Nr.: {$rechnung->id}
+
+{$header_date}anbei ï¿½bersenden wir Ihnen unsere aktuelle Rechnung als PDF-Datei und bitten um Zahlung auf unser Bankkonto.
+
+Message-ID: <{$message_id}>
+
+MIME-Version: 1.0Sofern Sie uns eine Einzugsermï¿½chtigung erteilt haben, werden wir den Rechnungsbetrag in den nï¿½chsten Tagen von Ihrem Konto abbuchen.
+
+Content-Type: multipart/mixed; boundary="{$boundary}"
+
+Disposition-Notification-To: buchhaltung@activeminds.deBei Rï¿½ckfragen stehen wir Ihnen gerne zur Verfï¿½gung.
 
 
-EOT;
 
-ob_start ();
+This is a multi-part message in MIME format.Mit freundlichen Grï¿½ï¿½en
+
+--{$boundary}
+
+Content-Type: text/plain; charset=UTF-8; format=flowed
+
+Content-Transfer-Encoding: 8bitEOT;
+
+
+
+Sehr geehrte Damen und Herren,ob_start ();
+
 include ('sig.txt');
-$eml .= rtrim (ob_get_contents()) . "\n\n";
+
+anbei erhalten Sie unsere Rechnung Nr. {$rechnung->id}.$eml .= rtrim (ob_get_contents()) . "\n\n";
+
 ob_end_clean ();
 
-$eml .= <<<EOT
+Mit freundlichen GrÃ¼ÃŸen
+
+active minds GmbH$eml .= <<<EOT
+
 --{$boundary}
-Content-Type: application/pdf; name="activeminds.pdf"
-Content-Transfer-Encoding: base64
-Content-Disposition: inline; filename="activeminds.pdf"
+
+--{$boundary}Content-Type: application/pdf; name="activeminds.pdf"
+
+Content-Type: application/pdf; name="Rechnung_{$rechnung->id}.pdf"Content-Transfer-Encoding: base64
+
+Content-Transfer-Encoding: base64Content-Disposition: inline; filename="activeminds.pdf"
+
+Content-Disposition: attachment; filename="Rechnung_{$rechnung->id}.pdf"
 
 {$pdf}
---{$boundary}--
-EOT;
 
+{$pdf}--{$boundary}--
+
+--{$boundary}--EOT;
+
+EOT;
 sendmail ($eml, $GLOBALS['conf_email_return_path']);
 
 ?>

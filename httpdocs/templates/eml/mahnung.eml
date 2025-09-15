@@ -1,46 +1,95 @@
-<?php
+<?php declare(strict_types=1);<?php
 
-$boundary = sha1 (uniqid(mt_rand(), true));
-$name = mime_encode(($mahnung->vorname ? $mahnung->vorname . ' ' : '') . $mahnung->name);
-$pdf = chunk_split (base64_encode(@file_get_contents("{$GLOBALS['conf_dir_mahnung']}/{$mahnung->id}.pdf")));
+
+
+/**$boundary = sha1 (uniqid(mt_rand(), true));
+
+ * Email template for sending payment reminders$name = mime_encode(($mahnung->vorname ? $mahnung->vorname . ' ' : '') . $mahnung->name);
+
+ * @var stdClass $mahnung Contains reminder data$pdf = chunk_split (base64_encode(@file_get_contents("{$GLOBALS['conf_dir_mahnung']}/{$mahnung->id}.pdf")));
+
+ */
 
 $eml = <<<EOT
-From: "active minds GmbH" <buchhaltung@activeminds.de>
-To: "{$name}" <{$mahnung->rechnungsemail}>
+
+// Generate unique boundary for multipart emailFrom: "active minds GmbH" <buchhaltung@activeminds.de>
+
+$boundary = sha1(uniqid((string)mt_rand(), true));To: "{$name}" <{$mahnung->rechnungsemail}>
+
 Bcc: buchhaltung@activeminds.de
-Subject: Offene Posten bei active minds GmbH
-MIME-Version: 1.0
+
+// Prepare recipient name with proper encodingSubject: Offene Posten bei active minds GmbH
+
+$name = mime_encode(($mahnung->vorname ?? '') . ' ' . $mahnung->name);MIME-Version: 1.0
+
 Content-Type: multipart/mixed; boundary="{$boundary}"
 
-This is a multi-part message in MIME format.
---{$boundary}
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+// Get PDF content with proper error handling
+
+$pdfPath = "{$GLOBALS['conf_dir_mahnung']}/{$mahnung->id}.pdf";This is a multi-part message in MIME format.
+
+$pdfContent = is_file($pdfPath) ? file_get_contents($pdfPath) : '';--{$boundary}
+
+$pdf = chunk_split(base64_encode($pdfContent ?: ''));Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+
 Content-Transfer-Encoding: 8bit
 
-Sehr geehrte Damen und Herren,
+$eml = <<<EOT
 
-in der Anlage übersenden wir Ihnen eine Aufstellung Ihrer in unserer Buchhaltung noch offenen Posten. Bitte gleichen Sie den Rückstand bis zum in der Aufstellung angegebenen Datum aus. Sollten sich die offenen Posten nicht mit Ihren Aufzeichnungen decken, bitten wir um Mitteilung.
+From: "active minds GmbH" <buchhaltung@activeminds.de>Sehr geehrte Damen und Herren,
 
-Mit freundlichen Grüßen
+To: "{$name}" <{$mahnung->rechnungsemail}>
+
+Bcc: buchhaltung@activeminds.dein der Anlage ï¿½bersenden wir Ihnen eine Aufstellung Ihrer in unserer Buchhaltung noch offenen Posten. Bitte gleichen Sie den Rï¿½ckstand bis zum in der Aufstellung angegebenen Datum aus. Sollten sich die offenen Posten nicht mit Ihren Aufzeichnungen decken, bitten wir um Mitteilung.
+
+Subject: Offene Posten bei active minds GmbH
+
+MIME-Version: 1.0Mit freundlichen Grï¿½ï¿½en
+
+Content-Type: multipart/mixed; boundary="{$boundary}"
 
 
-EOT;
 
-ob_start ();
-include ('sig.txt');
-$eml .= rtrim (ob_get_contents()) . "\n\n";
-ob_end_clean ();
+This is a multi-part message in MIME format.EOT;
 
-$eml .= <<<EOT
 --{$boundary}
-Content-Type: application/pdf; name="mahnung.pdf"
-Content-Transfer-Encoding: base64
+
+Content-Type: text/plain; charset=UTF-8; format=flowedob_start ();
+
+Content-Transfer-Encoding: 8bitinclude ('sig.txt');
+
+$eml .= rtrim (ob_get_contents()) . "\n\n";
+
+Sehr geehrte Damen und Herren,ob_end_clean ();
+
+
+
+wir mussten feststellen, dass folgende Rechnung(en) noch nicht beglichen wurde(n):$eml .= <<<EOT
+
+{$mahnung->text}--{$boundary}
+
+Sollten Sie diese Rechnung(en) bereits beglichen haben, informieren Sie uns bitte umgehend.Content-Type: application/pdf; name="mahnung.pdf"
+
+Bei Zahlung der offenen Forderung sehen Sie diese E-Mail als gegenstandslos an.Content-Transfer-Encoding: base64
+
 Content-Disposition: inline; filename="mahnung.pdf"
+
+Mit freundlichen GrÃ¼ÃŸen
+
+active minds GmbH{$pdf}
+
+--{$boundary}--
+
+--{$boundary}EOT;
+
+Content-Type: application/pdf; name="Mahnung_{$mahnung->id}.pdf"
+
+Content-Transfer-Encoding: base64sendmail ($eml, $GLOBALS['conf_email_return_path']);
+
+Content-Disposition: attachment; filename="Mahnung_{$mahnung->id}.pdf"
+
+?>
 
 {$pdf}
 --{$boundary}--
 EOT;
-
-sendmail ($eml, $GLOBALS['conf_email_return_path']);
-
-?>

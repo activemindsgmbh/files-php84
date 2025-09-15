@@ -1,41 +1,82 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title>testsuche</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Kunde suchen</h2>
+<?php declare(strict_types=1); ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<!DOCTYPE html><html>
+
+<html lang="de">  <head>
+
+<head>    <title>testsuche</title>
+
+    <meta charset="UTF-8">    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Kundensuche</title>    <link type="text/css" rel="stylesheet" href="/default.css">
+
+    <link rel="stylesheet" type="text/css" href="/default.css">  </head>
+
+</head>  <body>
+
+<body>    <?php @include('header.inc.html')?>
+
+    <?php @include('header.inc.html')?>    <h2>Kunde suchen</h2>
+
     <form action="/testsuche.php" method="post">
-      <p>
-        Kunde
-        <input name="pattern" type="text" value="<?php echo post_value('pattern')?>" size="24" maxlength="255">
-        <input name="send" type="submit" value="Kunde anzeigen">
-      </p>
-    </form>
+
+    <h2>Kundensuche</h2>      <p>
+
+    <form method="post">        Kunde
+
+        <label for="pattern">Suchbegriff:</label>        <input name="pattern" type="text" value="<?php echo post_value('pattern')?>" size="24" maxlength="255">
+
+        <input id="pattern" name="pattern" type="text" value="<?php echo htmlspecialchars(post_value('pattern'), ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>" size="24" maxlength="255">        <input name="send" type="submit" value="Kunde anzeigen">
+
+        <input type="submit" value="Suchen">      </p>
+
+    </form>    </form>
+
     <?php if(mysql_num_rows($rkunde)){?>
-    <div>&nbsp;</div>
-    <table border="1">
-      <tr>
 
-        <th>Kunde</th>
-     
+    <?php if($rkunde instanceof mysqli_result && $rkunde->num_rows > 0): ?>    <div>&nbsp;</div>
 
+        <table>    <table border="1">
 
-      </tr>
-      <?php while($rkunde=mysql_fetch_object($rkunde)){?>
-      <tr>
-       
-        <td><a href="/kundendaten.php?kunde=<?php echo urlencode($rkunde->kundennummer)?>"><?php echo htmlspecialchars($rkunde->name);if($rkunde->vorname)echo', '.htmlspecialchars($rkunde->vorname)?></a></td>
+        <tr>      <tr>
 
-  
-  
+          <th>Name</th>
 
-      </tr>
-      <?php }?>
-    </table>
-    <?php }?>
-  </body>
+          <th>Status</th>        <th>Kunde</th>
+
+          <th>Fak.</th>     
+
+          <th>Reg.</th>
+
+        </tr>
+
+        <?php while($kunde = $rkunde->fetch_object()): ?>      </tr>
+
+        <tr>      <?php while($rkunde=mysql_fetch_object($rkunde)){?>
+
+            <td>      <tr>
+
+                <a href="/kundendaten.php?kunde=<?php echo urlencode((string)$kunde->kundennummer)?>">       
+
+                    <?php echo htmlspecialchars($kunde->name . ($kunde->vorname ? ', ' . $kunde->vorname : ''), ENT_QUOTES | ENT_HTML5, 'UTF-8') ?>        <td><a href="/kundendaten.php?kunde=<?php echo urlencode($rkunde->kundennummer)?>"><?php echo htmlspecialchars($rkunde->name);if($rkunde->vorname)echo', '.htmlspecialchars($rkunde->vorname)?></a></td>
+
+                </a>
+
+            </td>  
+
+            <td><?php echo htmlspecialchars((string)$kunde->status, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?></td>  
+
+            <td><?php echo htmlspecialchars((string)$kunde->fak, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?></td>
+
+            <td><?php echo htmlspecialchars((string)$kunde->reg, ENT_QUOTES | ENT_HTML5, 'UTF-8') ?></td>      </tr>
+
+        </tr>      <?php }?>
+
+        <?php endwhile; ?>    </table>
+
+        </table>    <?php }?>
+
+    <?php endif; ?>  </body>
+
+</body></html>
 </html>
