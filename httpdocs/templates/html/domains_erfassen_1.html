@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Domains erfassen</h2>
+    <?php if(error()){?><div style="color:#F00;font-family:Courier New;font-size:48pt;font-weight:bold">Fehler</div><?php }?>
+    <form action="" method="post" name="theForm">
+      <table border="1">
+        <tr>
+          <th>Artikelnummer*</th>
+          <td>
+            <input name="artikel" type="text" value="<?=post_value('artikel')?>" size="10" maxlength="16">
+            <?php
+            $res = @mysql_query ('SELECT artikelnummer,kurztext FROM artikel WHERE domainreg=1 ORDER BY artikelnummer');
+            if (mysql_num_rows($res))
+            {
+            ?>
+            <select onchange="theForm.artikel.value=this.options[this.selectedIndex].value;theForm.preis.value=''">
+              <option value=""></option>
+              <?php
+              while ($obj = @mysql_fetch_object($res))
+              {
+                echo '<option value="' . htmlspecialchars($obj->artikelnummer) . '"' . (!strcasecmp(post_value('artikel'), $obj->artikelnummer) ? ' selected' : '') . '>';
+                echo htmlspecialchars($obj->artikelnummer) . '&nbsp;' . htmlspecialchars($obj->kurztext);
+                echo '</option>';
+              }
+              ?>
+            </select>
+            <?php }?>
+            <?php errormsg('leistung.artikel')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Preis</th>
+          <td>
+            <input name="preis" type="text" value="<?=post_value('preis')?>" size="10" maxlength="13">
+            <?php errormsg('leistung.preis')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Setup</th>
+          <td>
+            <input name="setup" type="text" value="<?=post_value('setup')?>" size="10" maxlength="13">
+            <?php errormsg('leistung.setup')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Registrierungsdatum*</th>
+          <td>
+            <input name="regdate" type="text" value="<?=post_value('regdate')?>" size="10" maxlength="13">
+            <?php errormsg('domain.regdate')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Abrechnungsdatum*</th>
+          <td>
+            <input name="referenzdatum" type="text" value="<?=post_value('referenzdatum')?>" size="10" maxlength="13">
+            <?php errormsg('leistung.referenzdatum')?>
+          </td>
+        </tr>
+        <tr>
+          <th>letztmalige Berechnung</th>
+          <td>
+            <input name="endedatum" type="text" value="<?=post_value('endedatum')?>" size="10" maxlength="13">
+            <?php errormsg('leistung.endedatum')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Domains*</th>
+          <td>
+            <textarea name="domains" cols="60" rows="16" wrap="virtual"><?=post_value('domains')?></textarea>
+            <?php errormsg('domains')?>
+          </td>
+        </tr>
+      </table>
+      <input type="submit" value="speichern">
+    </form>
+  </body>
+</html>

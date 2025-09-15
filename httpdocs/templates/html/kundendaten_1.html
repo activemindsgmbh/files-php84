@@ -1,0 +1,266 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <?php if($kunde){?>
+    <h2>Kunde bearbeiten</h2>
+    <?php }else{?>
+    <h2>Kunde erfassen</h2>
+    <?php }?>
+    <form action="" method="post" name="theForm">
+      <table>
+        <tr>
+          <th>Kundennummer</th>
+          <td>
+            <?php if($kunde)echo $kunde->kundennummer;else{?><input name="kundennummer" type="text" value="<?=post_value('kundennummer')?>" size="10" maxlength="10"><?php }?>
+            <?php errormsg('kunde.kundennummer')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Anrede*</th>
+          <td>
+            <input name="anrede" type="text" value="<?=post_value('anrede')?>" size="24" maxlength="255">
+            <?php
+            $res = @mysql_query ('SELECT DISTINCT BINARY anrede AS value FROM kunde WHERE anrede!=\'\' ORDER BY value');
+            if (mysql_num_rows($res))
+            {
+            ?>
+            <select onchange="theForm.anrede.value=this.options[this.selectedIndex].value">
+              <option value=""></option>
+              <?php
+              while ($obj = @mysql_fetch_object($res))
+              {
+                echo '<option value="' . htmlspecialchars($obj->value) . '"' . (post_value('anrede') == $obj->value ? ' selected' : '') . '>';
+                echo htmlspecialchars ($obj->value);
+                echo '</option>';
+              }
+              ?>
+            </select>
+            <?php }?>
+            <?php errormsg('kunde.anrede')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Vorname</th>
+          <td><input name="vorname" type="text" value="<?=post_value('vorname')?>" size="48" maxlength="255"></td>
+        </tr>
+        <tr>
+          <th>Nachname oder Firmenname*</th>
+          <td>
+            <input name="name" type="text" value="<?=post_value('name')?>" size="48" maxlength="255">
+            <?php errormsg('kunde.name')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Stra&szlig;e, Hausnr.*</th>
+          <td>
+            <input name="strasse" type="text" value="<?=post_value('strasse')?>" size="48" maxlength="255">
+            <?php errormsg('kunde.strasse')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Postleitzahl*</th>
+          <td>
+            <input name="postleitzahl" type="text" value="<?=post_value('postleitzahl')?>" size="10" maxlength="10">
+            <?php errormsg('kunde.postleitzahl')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Ort*</th>
+          <td>
+            <input name="ort" type="text" value="<?=post_value('ort')?>" size="48" maxlength="255">
+            <?php errormsg('kunde.ort')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Land*</th>
+          <td>
+            <select name="land">
+              <option value=""></option>
+              <?php
+              $res = @mysql_query ('SELECT code,name FROM land ORDER BY name');
+              while ($obj = @mysql_fetch_object($res))
+              {
+                echo '<option value="' . htmlspecialchars($obj->code) . '"' . (post_value('land') == $obj->code ? ' selected' : '') . '>';
+                echo htmlspecialchars ($obj->name);
+                echo '</option>';
+              }
+              ?>
+            </select>
+            <?php errormsg('kunde.land')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Anschrift</th>
+          <td>
+            <textarea name="anschrift" cols="60" rows="6" wrap="virtual"><?=post_value('anschrift')?></textarea>
+          </td>
+        </tr>
+        <tr>
+          <th>Ansprechpartner</th>
+          <td><textarea name="ansprechpartner" cols="60" rows="4" wrap="virtual"><?=post_value('ansprechpartner')?></textarea></td>
+        </tr>
+        <tr>
+          <th>Telefon</th>
+          <td>
+            <input name="telefon" type="text" value="<?=post_value('telefon')?>" size="24" maxlength="24"><br>
+            <input name="telefon2" type="text" value="<?=post_value('telefon2')?>" size="24" maxlength="24">
+          </td>
+        </tr>
+        <tr>
+          <th>Telefax</th>
+          <td><input name="telefax" type="text" value="<?=post_value('telefax')?>" size="24" maxlength="24"></td>
+        </tr>
+        <tr>
+          <th>Mobil</th>
+          <td><input name="mobil" type="text" value="<?=post_value('mobil')?>" size="24" maxlength="24"></td>
+        </tr>
+        <tr>
+          <th>E-Mailadresse</th>
+          <td>
+            <input name="email" type="text" value="<?=post_value('email')?>" size="48" maxlength="255">
+            <?php errormsg('kunde.email')?>
+          </td>
+        </tr>
+        <tr>
+          <th>E-Mailadresse (Rechnung)</th>
+          <td>
+            <input name="rechnungsemail" type="text" value="<?=post_value('rechnungsemail')?>" size="48" maxlength="255">
+            <?php errormsg('kunde.rechnungsemail')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Zahlweise*</th>
+          <td>
+            <input name="zahlweise" type="radio" value="LASTSCHRIFT"<?php if(post_value('zahlweise')=='LASTSCHRIFT')echo' checked'?>>Lastschrift<br>
+            <input name="zahlweise" type="radio" value="UEBERWEISUNG"<?php if(post_value('zahlweise')=='UEBERWEISUNG')echo' checked'?>>&Uuml;berweisung
+            <?php errormsg('kunde.zahlweise')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Bankleitzahl</th>
+          <td>
+            <input name="bankleitzahl" type="text" value="<?=post_value('bankleitzahl')?>" size="10" maxlength="16">
+            <?php errormsg('kunde.bankleitzahl')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Kontonummer</th>
+          <td>
+            <input name="kontonummer" type="text" value="<?=post_value('kontonummer')?>" size="10" maxlength="16">
+            <?php errormsg('kunde.kontonummer')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Kontoinhaber</th>
+          <td>
+            <input name="kontoinhaber" type="text" value="<?=post_value('kontoinhaber')?>" size="48" maxlength="255">
+            <?php errormsg('kunde.kontoinhaber')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Zahlungsziel*</th>
+          <td>
+            <input name="zahlungsziel" type="text" value="<?=post_value('zahlungsziel')?>" size="3" maxlength="3"> Tage
+            <?php errormsg('kunde.zahlungsziel')?>
+          </td>
+        </tr>
+        <tr>
+          <th>W&auml;hrung*</th>
+          <td>
+            <input name="waehrung" type="text" value="<?=post_value('waehrung')?>" size="3" maxlength="3">
+            <?php
+            $res = @mysql_query ('SELECT DISTINCT BINARY waehrung AS value FROM kunde WHERE waehrung!=\'\' ORDER BY value');
+            if (mysql_num_rows($res))
+            {
+            ?>
+            <select onchange="theForm.waehrung.value=this.options[this.selectedIndex].value">
+              <option value=""></option>
+              <?php
+              while ($obj = @mysql_fetch_object($res))
+              {
+                echo '<option value="' . htmlspecialchars($obj->value) . '"' . (post_value('waehrung') == $obj->value ? ' selected' : '') . '>';
+                echo htmlspecialchars ($obj->value);
+                echo '</option>';
+              }
+              ?>
+            </select>
+            <?php }?>
+            <?php errormsg('kunde.waehrung')?>
+          </td>
+        </tr>
+        <tr>
+          <th>Umsatzsteuer-ID</th>
+          <td><input name="umsatzsteuerid" type="text" value="<?=post_value('umsatzsteuerid')?>" size="16" maxlength="16"></td>
+        </tr>
+        <tr>
+          <th>Umsatzsteuerbefreit</th>
+          <td><input name="umsatzsteuerbefreit" type="checkbox" value="1"<?php if(post_value('umsatzsteuerbefreit')=='1')echo' checked';?>></td>
+        </tr>
+        <tr>
+          <th>Domains auf Rechnung zusammenfassen</th>
+          <td><input name="domainzusammenfassung" type="checkbox" value="1"<?php if(post_value('domainzusammenfassung')=='1')echo' checked';?>></td>
+        </tr>
+        <tr>
+          <th>Bemerkungen</th>
+          <td><textarea name="kommentar" cols="80" rows="16" wrap="virtual"><?=post_value('kommentar')?></textarea></td>
+        </tr>
+      </table>
+      <input type="submit" value="speichern">
+      <a href="/kunden.php"><input type="button" value="abbrechen"></a>
+      <?php if($kunde){?><a href="/kunde_loeschen.php?kunde=<?php echo urlencode($kunde->kundennummer)?>"><input type="button" value="l&ouml;schen"></a><?php }?>
+    </form>
+    <?php if($kunde){?>
+    <hr>
+    <h2>Sonderpreise ( <a href="/kundenpreise.php?kunde=<?php echo urlencode($kunde->kundennummer)?>">&auml;ndern</a> )</h2>
+    <?php
+    $query  = 'SELECT';
+    $query .= ' artikel.artikelnummer';
+    $query .= ',artikel.kurztext';
+    $query .= ',artikel.preis';
+    $query .= ',artikel.setup';
+    $query .= ',DATE_FORMAT(kundenpreis.bis,\'%d.%m.%Y\') AS bis';
+    $query .= ',IF(ISNULL(kundenpreis.preis),\'\',kundenpreis.preis) AS sonderpreis';
+    $query .= ',IF(ISNULL(kundenpreis.setup),\'\',kundenpreis.setup) AS sondersetup';
+    $query .= ',DATE_FORMAT(kundenpreis.von,\'%d.%m.%Y\') AS von';
+    $query .= ' FROM artikel';
+    $query .= ' LEFT JOIN kundenpreis ON kundenpreis.kunde=' . (int)$kunde->kundennummer . ' AND kundenpreis.artikel=artikel.id';
+    $query .= ' WHERE (NOT ISNULL(kundenpreis.preis) OR NOT ISNULL(kundenpreis.setup))';
+    $query .= ' ORDER BY artikel.artikelnummer';
+    $res = safe_mysql_query ($query);
+    if (mysql_num_rows($res))
+    {
+    ?>
+    <table border="1">
+      <tr>
+        <th>Artikelnummer</th>
+        <th>Artikel</th>
+        <th>Standardpreis</th>
+        <th>Sonderpreis</th>
+        <th>Standardsetup</th>
+        <th>Sondersetup</th>
+        <th>g&uuml;ltig von</th>
+        <th>g&uuml;ltig bis</th>
+      </tr>
+      <?php while($obj=mysql_fetch_object($res)){?>
+      <tr>
+        <td><?php echo htmlspecialchars($obj->artikelnummer)?></td>
+        <td><?php echo htmlspecialchars($obj->kurztext)?></td>
+        <td align="right"><?php echo htmlspecialchars(number_format($obj->preis,2,',','.'))?></td>
+        <td align="right"><?php echo htmlspecialchars($obj->sonderpreis!==''?number_format($obj->sonderpreis,2,',','.'):'')?></td>
+        <td align="right"><?php echo htmlspecialchars(number_format($obj->setup,2,',','.'))?></td>
+        <td align="right"><?php echo htmlspecialchars($obj->sondersetup!==''?number_format($obj->sondersetup,2,',','.'):'')?></td>
+        <td><?php echo htmlspecialchars($obj->von)?></td>
+        <td><?php echo htmlspecialchars($obj->bis)?></td>
+      </tr>
+      <?php }?>
+    </table>
+    <?php }?>
+    <?php }?>
+  </body>
+</html>

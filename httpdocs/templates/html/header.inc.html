@@ -1,0 +1,37 @@
+<H1>AM Fakt</h1>
+<div style="background-color:#0D8C9B;padding:6px;">
+<ul class="main menu">
+  <li><a href="/kunden.php">Kundenliste</a></li>
+  <li><a href="/kundendaten.php">Kunden erfassen</a></li>
+<!--  <li><a href="/kunden_mit_lastschrift_aber_ohne_daten.php">KmLaoD</a></li> -->
+  <li><a href="/artikel.php">Artikelliste</a></li>
+  <li><a href="/artikeldaten.php">Artikel erfassen</a></li>
+  <li><a href="/rechnungslauf.php">Rechnungslauf</a></li>
+  <li><a href="/rechnungen_suchen.php">Rechnungen suchen</a></li>
+  <li><a href="/lastschriften.php">Lastschriften</a></li>
+  <li><a href="/offene_posten.php">Offene Posten</a></li>
+  <li><a href="/domains_suchen.php">Domains suchen</a></li>
+  <li><a href="/domaincheck.php">Domaincheck</a></li>
+  <li><a href="/domainexport.php">Domainexport</a></li>
+	<li><a href="/konten.php">Bankkonten</a></li>
+	<li><a href="/kostenstellen.php">Kostenstellen</a></li>
+	<li><a href="/dummyrechnung.php">Dummyrechnung</a></li>
+</ul>
+</div>
+<?php $owner=$owner?$owner:$kunde;if($owner){?>
+<h1>
+  [ <?php echo htmlspecialchars($owner->kundennummer)?> ]
+  <a href="/kundendaten.php?kunde=<?php echo urlencode($owner->kundennummer)?>"><?php echo htmlspecialchars($owner->name);if($owner->vorname)echo', '.htmlspecialchars($owner->vorname)?></a>
+</h1>
+<ul class="menu">
+  <li><a href="/domains.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Domainliste</a></li>
+  <li><a href="/domainexport.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Domainexport</a></li>
+  <li><a href="/domains_erfassen.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Domains erfassen</a></li>
+  <li><a href="/leistungen.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Leistungen</a></li>
+  <li><a href="/leistung.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Leistung erfassen</a></li>
+  <li><a href="/kundenpreise.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Sonderpreise bearbeiten</a></li>
+  <li><a href="/offene_posten.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Offene Posten</a></li>
+  <li><a href="/rechnungen.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Rechnungen</a></li>
+  <li><a href="/mahnungen.php?kunde=<?php echo urlencode($owner->kundennummer)?>">Mahnungen</a></li>
+</ul>
+<?php }?>

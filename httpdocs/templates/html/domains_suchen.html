@@ -1,156 +1,80 @@
-<?php declare(strict_types=1); ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-
-<!DOCTYPE html><html>
-
-<html lang="de">	<head>
-
-<head>		<title></title>
-
-    <meta charset="UTF-8">		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-    <title>Domains suchen</title>		<link type="text/css" rel="stylesheet" href="/default.css">
-
-    <link rel="stylesheet" type="text/css" href="/default.css">		<script type="text/javascript">
-
-</head>		var state = false;
-
-<body>		function toggle ()
-
-    <?php @include('header.inc.html')?>		{
-
-    			state = !state;
-
-    <h2>Domains suchen</h2>			var arr = document.getElementsByName ("id[]");
-
-    <form method="post">			for (var i = 0; i < arr.length; ++i)
-
-        <table>			{
-
-            <tr>				arr[i].checked = state;
-
-                <td>Kunde:</td>			}
-
-                <td>		}
-
-                    <select name="kunde">		</script>
-
-                        <option value="">- Bitte wählen -</option>	</head>
-
-                        <?php if ($rkunde instanceof mysqli_result):	<body>
-
-                            while($kunde = $rkunde->fetch_object()): ?>		<?php @include('header.inc.html')?>
-
-                                <option value="<?php echo htmlspecialchars((string)$kunde->kundennummer, ENT_QUOTES | ENT_HTML5, 'UTF-8')?>"		<h2>Domains suchen</h2>
-
-                                    <?php echo ((string)$kunde->kundennummer === post_value('kunde')) ? ' selected' : '' ?>>		<form action="/domains_suchen.php" method="post">
-
-                                    <?php echo htmlspecialchars($kunde->name . ($kunde->vorname ? ', ' . $kunde->vorname : ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')?>			<p>
-
-                                </option>				Kunde:
-
-                            <?php endwhile;				<select name="kunde">
-
-                        endif; ?>					<option value="0">alle</option>
-
-                    </select>					<?php while($kunde=mysql_fetch_object($rkunde)){?>
-
-                </td>					<option value="<?php echo htmlspecialchars($kunde->kundennummer)?>"<?php if($kunde->kundennummer==post_value('kunde'))echo' selected'?>><?php echo htmlspecialchars($kunde->name).($kunde->vorname?', '.htmlspecialchars($kunde->vorname):'')?></option>
-
-            </tr>					<?php }?>
-
-            <tr>				</select><br>
-
-                <td>Domains:</td>				Domain(s):<br>
-
-                <td>				<textarea name="domains" cols="60" rows="8"><?php echo post_value('domains')?></textarea><br>
-
-                    <textarea name="domains" cols="60" rows="8"><?php echo htmlspecialchars(post_value('domains'), ENT_QUOTES | ENT_HTML5, 'UTF-8')?></textarea>				<input name="send" type="submit" value="Domains anzeigen"><br>
-
-                </td>			</p>
-
-            </tr>		</form>
-
-        </table>		<?php if(@mysql_num_rows($rdomains)){?>
-
-        <input type="submit" value="Suchen">		<form action="/domains_verwalten.php" method="post">
-
-    </form>			<p>
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link type="text/css" rel="stylesheet" href="/default.css">
+		<script type="text/javascript">
+		var state = false;
+		function toggle ()
+		{
+			state = !state;
+			var arr = document.getElementsByName ("id[]");
+			for (var i = 0; i < arr.length; ++i)
+			{
+				arr[i].checked = state;
+			}
+		}
+		</script>
+	</head>
+	<body>
+		<?php @include('header.inc.html')?>
+		<h2>Domains suchen</h2>
+		<form action="/domains_suchen.php" method="post">
+			<p>
+				Kunde:
+				<select name="kunde">
+					<option value="0">alle</option>
+					<?php while($kunde=mysql_fetch_object($rkunde)){?>
+					<option value="<?php echo htmlspecialchars($kunde->kundennummer)?>"<?php if($kunde->kundennummer==post_value('kunde'))echo' selected'?>><?php echo htmlspecialchars($kunde->name).($kunde->vorname?', '.htmlspecialchars($kunde->vorname):'')?></option>
+					<?php }?>
+				</select><br>
+				Domain(s):<br>
+				<textarea name="domains" cols="60" rows="8"><?php echo post_value('domains')?></textarea><br>
+				<input name="send" type="submit" value="Domains anzeigen"><br>
+			</p>
+		</form>
+		<?php if(@mysql_num_rows($rdomains)){?>
+		<form action="/domains_verwalten.php" method="post">
+			<p>
 				Ausgew&auml;hlte Domains
-
-    <?php if($rdomains instanceof mysqli_result && $rdomains->num_rows > 0): ?>				<input name="edit" type="submit" value="bearbeiten">
-
-        <form method="post">				<input name="remove" type="submit" value="l&ouml;schen">
-
-            <input name="cmd" type="hidden" value="update">			</p>
-
-            <table>			<table border="1">
-
-                <tr>				<tr>
-
-                    <th></th>					<th><input type="checkbox" onclick="toggle()"></th>
-
-                    <th>Domain</th>					<th>Domain</th>
-
-                    <th>Art</th>					<th>Kunde</th>
-
-                    <th>Start</th>					<th>Preis</th>
-
-                    <th>Ende</th>					<th>Setup</th>
-
-                    <th>Status</th>					<th>Abrechnungsbeginn</th>
-
-                    <th>Preis</th>					<th>zuletzt abgerechnet</th>
-
-                </tr>					<th>Abrechnungsende</th>
-
-                <?php while($domain = $rdomains->fetch_object()): ?>					<th>n&auml;chste Berechnung</th>
-
-                    <tr>					<th>Artikelnummer</th>
-
-                        <td><input name="id[]" type="checkbox" value="<?php echo htmlspecialchars((string)$domain->id, ENT_QUOTES | ENT_HTML5, 'UTF-8')?>"></td>					<th>NS-Records</th>
-
-                        <td>					<th>MX-Records</th>
-
-                            <a href="/domains_verwalten.php?id=<?php echo urlencode((string)$domain->id)?>&cmd=edit">					<th>Domain-Record</th>
-
-                                <?php echo htmlspecialchars((string)$domain->domain_name, ENT_QUOTES | ENT_HTML5, 'UTF-8')?>					<th>WWW-Record</th>
-
-                            </a>				</tr>
-
-                            <?php if(str_starts_with($domain->domain_name, 'xn--')): ?>				<?php while($domain=mysql_fetch_object($rdomains)){?>
-
-                                <br><?php echo htmlspecialchars((string)$domain->domain_utf8name, ENT_QUOTES | ENT_HTML5, 'UTF-8')?>				<tr valign="top">
-
-                            <?php endif; ?>					<td><input name="id[]" type="checkbox" value="<?php echo htmlspecialchars($domain->id)?>"></td>
-
-                        </td>					<td>
-
-                        <td><?php echo htmlspecialchars((string)$domain->art, ENT_QUOTES | ENT_HTML5, 'UTF-8')?></td>						<a href="/domains_verwalten.php?id=<?php echo urlencode($domain->id)?>&cmd=edit"><?php echo htmlspecialchars($domain->domain_name)?></a>
-
-                        <td><?php echo htmlspecialchars((string)$domain->start, ENT_QUOTES | ENT_HTML5, 'UTF-8')?></td>						<?php if(!strncmp($domain->domain_name,'xn--',4))echo '<br>'.htmlspecialchars($domain->domain_utf8name)?>
-
-                        <td><?php echo htmlspecialchars((string)$domain->ende, ENT_QUOTES | ENT_HTML5, 'UTF-8')?></td>					</td>
-
-                        <td><?php echo htmlspecialchars((string)$domain->status, ENT_QUOTES | ENT_HTML5, 'UTF-8')?></td>					<td><a href="/kundendaten.php?kunde=<?php echo urlencode($domain->kundennummer)?>"><?php echo htmlspecialchars($domain->name);if($domain->vorname)echo', '.htmlspecialchars($domain->vorname)?></a></td>
-
-                        <td><?php echo htmlspecialchars((string)$domain->preis, ENT_QUOTES | ENT_HTML5, 'UTF-8')?></td>					<td align="right"><?php echo htmlspecialchars(number_format($domain->preis,2,',','.'))?></td>
-
-                    </tr>					<td align="right"><?php echo htmlspecialchars(number_format($domain->setup,2,',','.'))?></td>
-
-                <?php endwhile; ?>					<td align="center"><?php echo htmlspecialchars($domain->referenzdatum)?></td>
-
-            </table>					<td align="center"><?php echo htmlspecialchars($domain->abgerechnet)?></td>
-
-            <input type="submit" value="Aktualisieren">					<td align="center"><?php echo htmlspecialchars($domain->endedatum)?></td>
-
-        </form>					<td align="center"><?php echo htmlspecialchars($domain->rechnung)?></td>
-
-    <?php endif; ?>					<td><?php echo htmlspecialchars($domain->artikelnummer)?></td>
-
-</body>					<td><?php echo nl2br(htmlspecialchars(str_replace(',',"\n",$domain->nshosts)))?></td>
-
-</html>					<td nowrap><?php echo nl2br(htmlspecialchars(str_replace(',',"\n",$domain->mxhosts)))?></td>
+				<input name="edit" type="submit" value="bearbeiten">
+				<input name="remove" type="submit" value="l&ouml;schen">
+			</p>
+			<table border="1">
+				<tr>
+					<th><input type="checkbox" onclick="toggle()"></th>
+					<th>Domain</th>
+					<th>Kunde</th>
+					<th>Preis</th>
+					<th>Setup</th>
+					<th>Abrechnungsbeginn</th>
+					<th>zuletzt abgerechnet</th>
+					<th>Abrechnungsende</th>
+					<th>n&auml;chste Berechnung</th>
+					<th>Artikelnummer</th>
+					<th>NS-Records</th>
+					<th>MX-Records</th>
+					<th>Domain-Record</th>
+					<th>WWW-Record</th>
+				</tr>
+				<?php while($domain=mysql_fetch_object($rdomains)){?>
+				<tr valign="top">
+					<td><input name="id[]" type="checkbox" value="<?php echo htmlspecialchars($domain->id)?>"></td>
+					<td>
+						<a href="/domains_verwalten.php?id=<?php echo urlencode($domain->id)?>&cmd=edit"><?php echo htmlspecialchars($domain->domain_name)?></a>
+						<?php if(!strncmp($domain->domain_name,'xn--',4))echo '<br>'.htmlspecialchars($domain->domain_utf8name)?>
+					</td>
+					<td><a href="/kundendaten.php?kunde=<?php echo urlencode($domain->kundennummer)?>"><?php echo htmlspecialchars($domain->name);if($domain->vorname)echo', '.htmlspecialchars($domain->vorname)?></a></td>
+					<td align="right"><?php echo htmlspecialchars(number_format($domain->preis,2,',','.'))?></td>
+					<td align="right"><?php echo htmlspecialchars(number_format($domain->setup,2,',','.'))?></td>
+					<td align="center"><?php echo htmlspecialchars($domain->referenzdatum)?></td>
+					<td align="center"><?php echo htmlspecialchars($domain->abgerechnet)?></td>
+					<td align="center"><?php echo htmlspecialchars($domain->endedatum)?></td>
+					<td align="center"><?php echo htmlspecialchars($domain->rechnung)?></td>
+					<td><?php echo htmlspecialchars($domain->artikelnummer)?></td>
+					<td><?php echo nl2br(htmlspecialchars(str_replace(',',"\n",$domain->nshosts)))?></td>
+					<td nowrap><?php echo nl2br(htmlspecialchars(str_replace(',',"\n",$domain->mxhosts)))?></td>
 					<td align="right"><a href="http://<?php echo htmlspecialchars($domain->domain_name)?>"><?php echo htmlspecialchars($domain->a_dom)?></a></td>
 					<td align="right"><a href="http://www.<?php echo htmlspecialchars($domain->domain_name)?>"><?php echo htmlspecialchars($domain->a_www)?></a></td>
 				</tr>

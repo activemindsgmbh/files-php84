@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Mahnungen versenden</h2>
+    <table border="1">
+      <tr>
+        <th>Datum</th>
+        <th>Betrag</th>
+        <th>verschickt</th>
+        <th>Empf&auml;nger</th>
+      </tr>
+      <?php while($mahnung=mysql_fetch_object($rmahnungen)){?>
+      <tr>
+        <td><?php echo htmlspecialchars($mahnung->datum)?></td>
+        <td><?php echo htmlspecialchars(number_format($mahnung->betrag,2,',','.').' '.$mahnung->waehrung)?></td>
+        <td><?php echo htmlspecialchars($mahnung->verschickt)?></td>
+        <td><?php echo htmlspecialchars($mahnung->rechnungsemail)?></td>
+      </tr>
+      <?php }?>
+    </table>
+    <form action="" method="post">
+      <input name="confirm" type="hidden" value="1">
+      <input name="ids" type="hidden" value="<?php echo htmlspecialchars($ids)?>">
+      <input type="submit" value="versenden">
+      <a href="/index.php"><input type="button" value="abbrechen"></a>
+    </form>
+  </body>
+</html>

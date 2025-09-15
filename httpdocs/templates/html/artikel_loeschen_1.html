@@ -1,0 +1,18 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h1>[&nbsp;<?php echo htmlspecialchars($artikel->artikelnummer)?>&nbsp;]&nbsp;<a href="/artikeldaten.php?id=<?php echo urlencode($artikel->id)?>"><?php echo htmlspecialchars($artikel->kurztext)?></a></h1>
+    <h2>Artikel l&ouml;schen</h2>
+    <form action="" method="post">
+      <input name="confirm_delete" type="hidden" value="1">
+      <input type="submit" value="l&ouml;schen">
+      <a href="/artikel.php"><input type="button" value="abbrechen"></a>
+    </form>
+  </body>
+</html>
