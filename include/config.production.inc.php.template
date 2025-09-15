@@ -1,0 +1,19 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Production environment configuration
+ * IMPORTANT: Update with your production values
+ */
+
+// Production Database
+$GLOBALS['conf_mysql_db']   = 'PRODUCTION_DB_NAME';      // Replace with production database name
+$GLOBALS['conf_mysql_host'] = 'PRODUCTION_DB_HOST';      // Replace with production database host
+$GLOBALS['conf_mysql_user'] = 'PRODUCTION_DB_USER';      // Replace with production database username
+$GLOBALS['conf_mysql_pass'] = 'PRODUCTION_DB_PASSWORD';  // Replace with production database password
+
+// Production Paths
+$GLOBALS['conf_logo'] = '/var/www/vhosts/your-domain.com/data/logo.png';
+$GLOBALS['conf_dir_mahnung'] = '/var/www/vhosts/your-domain.com/httpdocs/pdf/mahnungen';
+$GLOBALS['conf_dir_rechnung_intern'] = '/var/www/vhosts/your-domain.com/httpdocs/pdf/rechnungen/intern';
+$GLOBALS['conf_dir_rechnung_kunde'] = '/var/www/vhosts/your-domain.com/httpdocs/pdf/rechnungen/kunde';

@@ -1,0 +1,21 @@
+# Ignore environment-specific configurations
+include/config.production.inc.php
+include/config.development.inc.php
+include/config.staging.inc.php
+
+# Keep templates
+!include/config.*.template
+
+# Ignore generated files
+httpdocs/pdf/*
+!httpdocs/pdf/.gitkeep
+
+# Ignore sensitive data
+*.key
+*.pem
+.env
+.env.*
+
+# Ignore system files
+.DS_Store
+Thumbs.db
