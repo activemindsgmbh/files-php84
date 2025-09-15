@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Rechnungen versenden</h2>
+    <table border="1">
+      <tr>
+        <th>Nummer</th>
+        <th>Datum</th>
+        <th>F&auml;lligkeitsdatum</th>
+        <th>Status</th>
+        <th>Forderung</th>
+        <th>bezahlt</th>
+        <th>verschickt</th>
+        <th>Empf&auml;nger</th>
+      </tr>
+      <?php while($rechnung=mysql_fetch_object($rrechnungen)){?>
+      <tr>
+        <td><?php echo htmlspecialchars($rechnung->id)?></td>
+        <td><?php echo htmlspecialchars($rechnung->datum)?></td>
+        <td><?php echo htmlspecialchars($rechnung->faellig)?></td>
+        <td><?php echo htmlspecialchars($rechnung->status)?></td>
+        <td><?php echo htmlspecialchars(number_format($rechnung->forderung,2,',','.').' '.$rechnung->waehrung)?></td>
+        <td><?php if($rechnung->zahlung>0)echo htmlspecialchars(number_format($rechnung->zahlung,2,',','.').' '.$rechnung->waehrung)?></td>
+        <td><?php echo htmlspecialchars($rechnung->verschickt)?></td>
+        <td><?php echo htmlspecialchars($rechnung->rechnungsemail)?></td>
+      </tr>
+      <?php }?>
+    </table>
+    <form action="" method="post">
+      <input name="confirm" type="hidden" value="1">
+      <input name="ids" type="hidden" value="<?php echo htmlspecialchars($ids)?>">
+      <input type="submit" value="versenden">
+      <a href="/index.php"><input type="button" value="abbrechen"></a>
+    </form>
+  </body>
+</html>

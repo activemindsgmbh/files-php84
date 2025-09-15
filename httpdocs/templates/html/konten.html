@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Bankkonten</h2>
+    <?php if(error()){?><div style="color:#F00;font-family:Courier New;font-size:48pt;font-weight:bold">Fehler</div><?php }?>
+    <form action="" method="post" name="theForm">
+			<?php while($konto=mysql_fetch_object($konten)){?>
+			<div><input name="name_<?php echo (int)$konto->id?>" type="text" value="<?php echo post_value('name_'.(int)$konto->id)?>" size="48" maxlength="255"></div>
+      <?php errormsg('konto.name['.(int)$konto->id.']','konto.name')?>
+			<?php }?>
+			<h3>Neues Bankkonto</h3>
+			<div><input name="new" type="text" value="<?php echo post_value('new')?>" size="48" maxlength="255"></div>
+      <?php errormsg('konto.name[\'new\']','konto.name')?>
+      </table>
+      <input type="submit" value="aktualisieren">
+    </form>
+  </body>
+</html>

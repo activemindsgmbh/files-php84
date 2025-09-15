@@ -1,0 +1,92 @@
+body {
+  font-family: Arial;
+  font-size: 10pt;
+  padding: 20px;
+  border: 1px solid silver;
+  background-color: #ddd; 
+
+
+}
+
+hr {
+  border: 1px solid #000;
+}
+
+table {
+  border: 1px solid #000;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td {
+  border: 1px solid #000;
+  padding: 3px;
+}
+
+th {
+  background-color: #EEE;
+  border: 1px solid #000;
+  padding: 3px;
+}
+
+ul.main {
+  font-weight: bold;
+}
+
+ul.menu {
+  display: inline;
+  list-style-type: none;
+  padding-left: 0;
+	font-size: 9pt;
+}
+
+ul.menu li {
+  display: inline;
+  margin-right: 8px;
+  padding: 4px;
+}
+
+ul.menu li a {
+color: white;
+}
+
+ul.menu li a:hover {
+color: yellow;
+}
+
+.errormsg {
+  color: #F00;
+}
+
+.menu {
+background-color: #0D8C9B;
+padding: 2px;
+}
+
+h1 a {
+color: #3F5B7F;
+font-size: 18px;
+}
+
+h1 {
+	font-size: 18px;
+}
+
+h3 a {
+color: #0D8C9B;
+font-size: 16px;
+}
+
+h3 {
+	font-size: 16px;
+}
+
+td a:link, td a:visited {
+color: black;
+font-weight: bold;
+}
+
+td a:hover, td a:focus {
+color: white;
+font-weight: bold;
+}

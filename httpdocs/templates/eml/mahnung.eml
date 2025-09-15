@@ -1,0 +1,46 @@
+<?php
+
+$boundary = sha1 (uniqid(mt_rand(), true));
+$name = mime_encode(($mahnung->vorname ? $mahnung->vorname . ' ' : '') . $mahnung->name);
+$pdf = chunk_split (base64_encode(@file_get_contents("{$GLOBALS['conf_dir_mahnung']}/{$mahnung->id}.pdf")));
+
+$eml = <<<EOT
+From: "active minds GmbH" <buchhaltung@activeminds.de>
+To: "{$name}" <{$mahnung->rechnungsemail}>
+Bcc: buchhaltung@activeminds.de
+Subject: Offene Posten bei active minds GmbH
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="{$boundary}"
+
+This is a multi-part message in MIME format.
+--{$boundary}
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 8bit
+
+Sehr geehrte Damen und Herren,
+
+in der Anlage übersenden wir Ihnen eine Aufstellung Ihrer in unserer Buchhaltung noch offenen Posten. Bitte gleichen Sie den Rückstand bis zum in der Aufstellung angegebenen Datum aus. Sollten sich die offenen Posten nicht mit Ihren Aufzeichnungen decken, bitten wir um Mitteilung.
+
+Mit freundlichen Grüßen
+
+
+EOT;
+
+ob_start ();
+include ('sig.txt');
+$eml .= rtrim (ob_get_contents()) . "\n\n";
+ob_end_clean ();
+
+$eml .= <<<EOT
+--{$boundary}
+Content-Type: application/pdf; name="mahnung.pdf"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline; filename="mahnung.pdf"
+
+{$pdf}
+--{$boundary}--
+EOT;
+
+sendmail ($eml, $GLOBALS['conf_email_return_path']);
+
+?>
