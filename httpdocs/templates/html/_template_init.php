@@ -1,55 +1,32 @@
 <?php
-declare(strict_types=1);
-
-/**
- * Common template functions and variable initialization
- */
-
-// Initialize commonly used variables with null coalescing operator
-$kunde = $kunde ?? null;
-$owner = $owner ?? null;
-$rkunde = $rkunde ?? null;
-$rdomains = $rdomains ?? null;
-$domain = $domain ?? null;
-$result = $result ?? null;
-
-/**
- * Safe echo with HTML escaping
- * @param mixed $value Value to echo
- * @return void
- */
-function safe_echo(mixed $value): void {
-    echo htmlspecialchars((string)$value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-}
-
-/**
- * Safe URL encode
- * @param mixed $value Value to encode
- * @return string
- */
-function safe_url(mixed $value): string {
-    return urlencode((string)$value);
-}
-
-/**
- * Check if a variable is a valid database result
- * @param mixed $result Result to check
- * @return bool
- */
-function is_valid_result(mixed $result): bool {
-    return $result instanceof mysqli_result && $result->num_rows > 0;
-}
-
-/**
- * Get a property from an object safely
- * @param mixed $obj Object to get property from
- * @param string $prop Property name
- * @param mixed $default Default value
- * @return mixed
- */
-function get_prop(mixed $obj, string $prop, mixed $default = ''): mixed {
-    if (!is_object($obj)) {
-        return $default;
+// Initialize template system
+if (!defined('TEMPLATE_INIT')) {
+    define('TEMPLATE_INIT', true);
+    
+    // Set content type and charset
+    header('Content-Type: text/html; charset=UTF-8');
+    
+    // Enable error reporting for templates
+    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+    ini_set('display_errors', 'Off');
+    
+    // Define common template functions
+    if (!function_exists('safe_url')) {
+        function safe_url($str) {
+            return htmlspecialchars(urlencode($str), ENT_QUOTES, 'UTF-8');
+        }
     }
-    return $obj->$prop ?? $default;
+    
+    if (!function_exists('safe_html')) {
+        function safe_html($str) {
+            return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+        }
+    }
+    
+    if (!function_exists('is_valid_result')) {
+        function is_valid_result($result) {
+            return ($result && ($result instanceof mysqli_result));
+        }
+    }
 }
+?>
