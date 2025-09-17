@@ -1,38 +1,41 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Artikelliste</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
     <h2>Artikelliste</h2>
-    <table border="1">
-      <tr>
-        <th>Artikelnummer</th>
-        <th>Artikeltext</th>
-        <th>Preis</th>
-        <th>Setup</th>
-        <th>Umsatzsteuer</th>
-        <th>Fibu Kontonummer</th>
-        <th>Abrechnungsintervall</th>
-        <th>domains</th>
-        <th>domainreg</th>
-      </tr>
-      <?php while($artikel=mysql_fetch_object($rartikel)){?>
-      <tr>
-        <td><a href="/artikeldaten.php?id=<?=urlencode($artikel->id)?>"><?php echo htmlspecialchars($artikel->artikelnummer)?></a></td>
-        <td><?php echo htmlspecialchars($artikel->kurztext)?></td>
-        <td align="right"><?php echo htmlspecialchars(number_format($artikel->preis,2,',','.'))?></td>
-        <td align="right"><?php echo htmlspecialchars(number_format($artikel->setup,2,',','.'))?></td>
-        <td align="right"><?php echo htmlspecialchars($artikel->umsatzsteuer)?></td>
-        <td align="right"><?php echo htmlspecialchars($artikel->fibukonto)?></td>
-        <td align="right"><?php echo htmlspecialchars($artikel->intervall)?></td>
-        <td align="right"><?php echo htmlspecialchars($artikel->domains)?></td>
-        <td align="center"><?php echo ($artikel->domainreg==1?'ja':'')?></td>
-      </tr>
-      <?php }?>
-    </table>
-  </body>
+    
+    <?php if (is_valid_result($result)): ?>
+        <table>
+            <tr>
+                <th>Nr</th>
+                <th>Bezeichnung</th>
+                <th>Art</th>
+                <th>Preis</th>
+                <th>Status</th>
+            </tr>
+            <?php while ($artikel = $result->fetch_object()): ?>
+                <tr>
+                    <td>
+                        <a href="/artikeldaten.php?artikel=<?php echo safe_url($artikel->artikelnummer) ?>">
+                            <?php safe_echo($artikel->artikelnummer) ?>
+                        </a>
+                    </td>
+                    <td><?php safe_echo($artikel->bezeichnung) ?></td>
+                    <td><?php safe_echo($artikel->art) ?></td>
+                    <td><?php safe_echo($artikel->preis) ?></td>
+                    <td><?php safe_echo($artikel->status) ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </table>
+    <?php else: ?>
+        <p>Keine Artikel gefunden.</p>
+    <?php endif; ?>
+</body>
 </html>
