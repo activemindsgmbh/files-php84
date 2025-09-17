@@ -1,34 +1,60 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kundenliste</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
     <h2>Kundenliste</h2>
-    <table border="1">
-      <tr>
-        <th>Kundennummer</th>
-        <th>Name</th>
-        <th>Ort</th>
-      </tr>
-      <?php while($kunde=mysql_fetch_object($rkunde)){?>
-      <tr>
-        <td><a href="/kundendaten.php?kunde=<?=urlencode($kunde->kundennummer)?>"><?php echo htmlspecialchars($kunde->kundennummer)?></a></td>
-        <td><?php echo htmlspecialchars($kunde->name).($kunde->vorname?', '.htmlspecialchars($kunde->vorname):'')?>
-				<br>
-				
-				</td>
-        <td>
-        <?php echo htmlspecialchars($kunde->strasse)?>  <br>
-				<?php echo htmlspecialchars($kunde->postleitzahl)?> <?php echo htmlspecialchars($kunde->ort)?>
-				
-				
-				</td>
-      </tr>
-      <?php }?>
-    </table>
-  </body>
+    
+    <?php if (isset($erfolg) && $erfolg): ?>
+        <p class="success">Die Änderungen wurden erfolgreich gespeichert.</p>
+    <?php endif; ?>
+
+    <?php if (is_valid_result($result)): ?>
+        <table>
+            <tr>
+                <th>Nr</th>
+                <th>Name</th>
+                <th>Firma</th>
+                <th>Ort</th>
+                <th>Status</th>
+            </tr>
+            <?php while ($kunde = $result->fetch_object()): ?>
+                <tr>
+                    <td>
+                        <a href="/kundendaten.php?kunde=<?php echo safe_url($kunde->kundennummer) ?>">
+                            <?php safe_echo($kunde->kundennummer) ?>
+                        </a>
+                    </td>
+                    <td>
+                        <?php 
+                        safe_echo($kunde->name);
+                        if (!empty($kunde->vorname)) {
+                            echo ', ';
+                            safe_echo($kunde->vorname);
+                        }
+                        ?>
+                    </td>
+                    <td><?php safe_echo($kunde->firma) ?></td>
+                    <td>
+                        <?php
+                        if (!empty($kunde->plz)) {
+                            safe_echo($kunde->plz . ' ');
+                        }
+                        safe_echo($kunde->ort);
+                        ?>
+                    </td>
+                    <td><?php safe_echo($kunde->status) ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </table>
+    <?php else: ?>
+        <p>Keine Kunden gefunden.</p>
+    <?php endif; ?>
+</body>
 </html>

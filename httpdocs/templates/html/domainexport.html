@@ -1,15 +1,44 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Domainexport</h2>
-    <p>
-      keine Domains
-    </p>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Domain Export</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Domain Export</h2>
+    
+    <form method="post">
+        <input type="hidden" name="cmd" value="export">
+        <table>
+            <tr>
+                <td>Format:</td>
+                <td>
+                    <select name="format">
+                        <option value="csv"<?php echo post_value('format') === 'csv' ? ' selected' : '' ?>>CSV</option>
+                        <option value="excel"<?php echo post_value('format') === 'excel' ? ' selected' : '' ?>>Excel</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Status:</td>
+                <td>
+                    <select name="status">
+                        <option value="">Alle</option>
+                        <option value="aktiv"<?php echo post_value('status') === 'aktiv' ? ' selected' : '' ?>>aktiv</option>
+                        <option value="inaktiv"<?php echo post_value('status') === 'inaktiv' ? ' selected' : '' ?>>inaktiv</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" value="Exportieren">
+    </form>
+
+    <?php if (isset($error)): ?>
+        <p class="error"><?php safe_echo($error) ?></p>
+    <?php endif; ?>
+</body>
 </html>

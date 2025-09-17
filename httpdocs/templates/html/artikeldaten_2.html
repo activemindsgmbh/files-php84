@@ -1,14 +1,25 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h1>[&nbsp;<?php echo htmlspecialchars($artikel->artikelnummer)?>&nbsp;]&nbsp;<a href="/artikeldaten.php?id=<?php echo urlencode($artikel->id)?>"><?php echo htmlspecialchars($artikel->kurztext)?></a></h1>
-    <h2>Artikel erfassen/bearbeiten</h2>
-    <p>Artikel gespeichert</p>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Artikeldaten - Bestätigung</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Artikeldaten - Bestätigung</h2>
+    
+    <?php if (isset($erfolg) && $erfolg): ?>
+        <p class="success">Die Änderungen wurden erfolgreich gespeichert.</p>
+    <?php else: ?>
+        <p class="error">Beim Speichern ist ein Fehler aufgetreten.</p>
+        <?php if (isset($error)): ?>
+            <p class="error"><?php safe_echo($error) ?></p>
+        <?php endif; ?>
+    <?php endif; ?>
+    
+    <p><a href="/artikel.php">Zurück zur Übersicht</a></p>
+</body>
 </html>

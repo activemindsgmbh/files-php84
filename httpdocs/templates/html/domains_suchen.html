@@ -5,79 +5,110 @@
     <meta charset="UTF-8">
     <title>Domains suchen</title>
     <link rel="stylesheet" type="text/css" href="/default.css">
+    <script>
+        function toggleCheckboxes() {
+            const checkboxes = document.querySelectorAll('input[name="id[]"]');
+            const mainCheckbox = document.getElementById('toggleAll');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = mainCheckbox.checked;
+            });
+        }
+    </script>
 </head>
 <body>
-    <?php @include('header.inc.html')?>
-    
+    <?php @include('header.inc.html') ?>
+
     <h2>Domains suchen</h2>
-    <form method="post">
-        <table>
-            <tr>
-                <td>Kunde:</td>
-                <td>
-                    <select name="kunde">
-                        <option value="">- Bitte wählen -</option>
-                        <?php if (is_valid_result($rkunde)):
-                            while ($kunde = $rkunde->fetch_object()): ?>
-                                <option value="<?php safe_echo($kunde->kundennummer) ?>"
-                                    <?php echo ((string)$kunde->kundennummer === (string)post_value('kunde')) ? ' selected' : '' ?>>
-                                    <?php 
-                                    safe_echo($kunde->name);
-                                    if (!empty($kunde->vorname)) {
-                                        echo ', ';
-                                        safe_echo($kunde->vorname);
-                                    }
-                                    ?>
-                                </option>
-                            <?php endwhile;
-                        endif; ?>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>Domains:</td>
-                <td>
-                    <textarea name="domains" cols="60" rows="8"><?php safe_echo(post_value('domains')) ?></textarea>
-                </td>
-            </tr>
-        </table>
-        <input type="submit" value="Suchen">
+
+    <form method="post" class="search-form">
+        <div class="form-group">
+            <label for="kunde">Kunde:</label>
+            <select name="kunde" id="kunde">
+                <option value="0">Alle Kunden</option>
+                <?php if (is_valid_result($rkunde)):
+                    while ($kunde = $rkunde->fetch_object()): ?>
+                        <option value="<?php safe_echo($kunde->kundennummer) ?>"
+                            <?php echo ((string)$kunde->kundennummer === (string)post_value('kunde')) ? ' selected' : '' ?>>
+                            <?php 
+                            safe_echo($kunde->name);
+                            if (!empty($kunde->vorname)) {
+                                echo ', ';
+                                safe_echo($kunde->vorname);
+                            }
+                            ?>
+                        </option>
+                    <?php endwhile;
+                endif; ?>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="domains">Domain(s):</label>
+            <textarea name="domains" id="domains" cols="60" rows="8"><?php safe_echo(post_value('domains')) ?></textarea>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" name="send">Domains suchen</button>
+        </div>
     </form>
 
-    <?php if (is_valid_result($rdomains)): ?>
-        <form method="post">
-            <input name="cmd" type="hidden" value="update">
+    <?php if (is_valid_result($rdomains) && $rdomains->num_rows > 0): ?>
+        <form method="post" action="/domains_verwalten.php">
+            <div class="form-actions">
+                <button type="submit" name="edit">Ausgewählte Domains bearbeiten</button>
+                <button type="submit" name="remove" onclick="return confirm('Möchten Sie die ausgewählten Domains wirklich löschen?');">
+                    Ausgewählte Domains löschen
+                </button>
+            </div>
+
             <table>
                 <tr>
-                    <th></th>
+                    <th><input type="checkbox" id="toggleAll" onclick="toggleCheckboxes()"></th>
                     <th>Domain</th>
-                    <th>Art</th>
+                    <th>Kunde</th>
+                    <th>Preis</th>
+                    <th>Setup</th>
                     <th>Start</th>
                     <th>Ende</th>
                     <th>Status</th>
-                    <th>Preis</th>
                 </tr>
                 <?php while ($domain = $rdomains->fetch_object()): ?>
                     <tr>
-                        <td><input name="id[]" type="checkbox" value="<?php safe_echo($domain->id) ?>"></td>
+                        <td>
+                            <input type="checkbox" name="id[]" value="<?php safe_echo($domain->id) ?>">
+                        </td>
                         <td>
                             <a href="/domains_verwalten.php?id=<?php echo safe_url($domain->id) ?>&cmd=edit">
                                 <?php safe_echo($domain->domain_name) ?>
+                                <?php if (str_starts_with((string)$domain->domain_name, 'xn--')): ?>
+                                    <br><?php safe_echo($domain->domain_utf8name) ?>
+                                <?php endif; ?>
                             </a>
-                            <?php if (str_starts_with((string)$domain->domain_name, 'xn--')): ?>
-                                <br><?php safe_echo($domain->domain_utf8name) ?>
+                        </td>
+                        <td>
+                            <?php 
+                            safe_echo($domain->kunde_name);
+                            if (!empty($domain->kunde_vorname)) {
+                                echo ', ';
+                                safe_echo($domain->kunde_vorname);
+                            }
+                            ?>
+                        </td>
+                        <td class="text-right"><?php safe_echo(number_format($domain->preis, 2, ',', '.')) ?> €</td>
+                        <td class="text-right">
+                            <?php if (!empty($domain->setup)): ?>
+                                <?php safe_echo(number_format($domain->setup, 2, ',', '.')) ?> €
                             <?php endif; ?>
                         </td>
-                        <td><?php safe_echo($domain->art) ?></td>
                         <td><?php safe_echo($domain->start) ?></td>
                         <td><?php safe_echo($domain->ende) ?></td>
                         <td><?php safe_echo($domain->status) ?></td>
-                        <td><?php safe_echo($domain->preis) ?></td>
                     </tr>
                 <?php endwhile; ?>
             </table>
-            <input type="submit" value="Aktualisieren">
         </form>
+    <?php elseif (isset($_POST['send'])): ?>
+        <p>Keine Domains gefunden.</p>
     <?php endif; ?>
 </body>
 </html>

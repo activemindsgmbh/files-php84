@@ -1,52 +1,67 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Sonderpreise</h2>
-    <?php if(error()){?><div style="color:#F00;font-family:Courier New;font-size:48pt;font-weight:bold">Fehler</div><?php }?>
-    <form action="" method="post" name="theForm">
-      <table border="1">
-        <tr>
-          <th>Artikelnummer</th>
-          <th>Artikel</th>
-          <th>Preis</th>
-          <th>Sonderpreis</th>
-          <th>Setup</th>
-          <th>Sondersetup</th>
-          <th>g&uuml;ltig ab</th>
-          <th>g&uuml;ltig bis</th>
-        </tr>
-        <?php while($artikel=mysql_fetch_object($rartikel)){?>
-        <tr>
-          <td><?php echo htmlspecialchars($artikel->artikelnummer)?></td>
-          <td><?php echo htmlspecialchars($artikel->kurztext)?></td>
-          <td align="right"><?php echo htmlspecialchars(number_format($artikel->preis,2,',','.'))?></td>
-          <td>
-            <input name="preis@<?php echo (int)$artikel->id?>" type="text" value="<?=post_value('preis@'.(int)$artikel->id)?>" size="10" maxlength="13">
-            <?php errormsg('kundenpreis.preis['.(int)$artikel->id.']','kundenpreis.preis')?>
-          </td>
-          <td align="right"><?php echo htmlspecialchars(number_format($artikel->setup,2,',','.'))?></td>
-          <td>
-            <input name="setup@<?php echo (int)$artikel->id?>" type="text" value="<?=post_value('setup@'.(int)$artikel->id)?>" size="10" maxlength="13">
-            <?php errormsg('kundenpreis.setup['.(int)$artikel->id.']','kundenpreis.setup')?>
-          </td>
-          <td>
-            <input name="von@<?php echo (int)$artikel->id?>" type="text" value="<?=post_value('von@'.(int)$artikel->id)?>" size="10" maxlength="13">
-            <?php errormsg('kundenpreis.von['.(int)$artikel->id.']','kundenpreis.von')?>
-          </td>
-          <td>
-            <input name="bis@<?php echo (int)$artikel->id?>" type="text" value="<?=post_value('bis@'.(int)$artikel->id)?>" size="10" maxlength="13">
-            <?php errormsg('kundenpreis.bis['.(int)$artikel->id.']','kundenpreis.bis')?>
-          </td>
-        </tr>
-        <?php }?>
-      </table>
-      <input type="submit" value="speichern">
-    </form>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kundenpreise</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Kundenpreise</h2>
+
+    <?php if (isset($kunde) && $kunde): ?>
+        <table>
+            <tr>
+                <td>Kunde:</td>
+                <td>
+                    <?php 
+                    safe_echo($kunde->name);
+                    if (!empty($kunde->vorname)) {
+                        echo ', ';
+                        safe_echo($kunde->vorname);
+                    }
+                    if (!empty($kunde->firma)) {
+                        echo '<br>';
+                        safe_echo($kunde->firma);
+                    }
+                    ?>
+                </td>
+            </tr>
+        </table>
+
+        <h3>Preise</h3>
+        <form method="post">
+            <input type="hidden" name="cmd" value="save">
+            <input type="hidden" name="kunde" value="<?php safe_echo($kunde->kundennummer) ?>">
+            <table>
+                <tr>
+                    <th>Artikel</th>
+                    <th>Bezeichnung</th>
+                    <th>Standardpreis</th>
+                    <th>Kundenpreis</th>
+                </tr>
+                <?php if (is_valid_result($artikel)):
+                    while ($art = $artikel->fetch_object()): ?>
+                        <tr>
+                            <td><?php safe_echo($art->artikelnummer) ?></td>
+                            <td><?php safe_echo($art->bezeichnung) ?></td>
+                            <td><?php safe_echo(number_format($art->standardpreis, 2, ',', '.')) ?> €</td>
+                            <td>
+                                <input type="number" name="preis[<?php safe_echo($art->artikelnummer) ?>]" 
+                                    value="<?php safe_echo(post_value('preis['.$art->artikelnummer.']', $art->kundenpreis)) ?>" 
+                                    step="0.01">
+                            </td>
+                        </tr>
+                    <?php endwhile;
+                endif; ?>
+            </table>
+            <input type="submit" value="Speichern">
+        </form>
+    <?php else: ?>
+        <p>Kunde nicht gefunden.</p>
+        <p><a href="/kunden.php">Zurück zur Übersicht</a></p>
+    <?php endif; ?>
+</body>
 </html>

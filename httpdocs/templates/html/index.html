@@ -1,11 +1,61 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Hauptmenü</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Hauptmenü</h2>
+    
+    <h3>Kunden</h3>
+    <ul>
+        <li><a href="/kunden.php">Kunden verwalten</a></li>
+        <li><a href="/kundenpreise.php">Kundenpreise</a></li>
+    </ul>
+
+    <h3>Artikel</h3>
+    <ul>
+        <li><a href="/artikel.php">Artikel verwalten</a></li>
+    </ul>
+
+    <h3>Domains</h3>
+    <ul>
+        <li><a href="/domains.php">Domains verwalten</a></li>
+        <li><a href="/domains_suchen.php">Domains suchen</a></li>
+        <li><a href="/domainexport.php">Domain Export</a></li>
+    </ul>
+
+    <h3>Leistungen</h3>
+    <ul>
+        <li><a href="/leistungen.php">Leistungen verwalten</a></li>
+    </ul>
+
+    <h3>Rechnungen</h3>
+    <ul>
+        <li><a href="/rechnungen.php">Rechnungen verwalten</a></li>
+        <li><a href="/rechnungen_suchen.php">Rechnungen suchen</a></li>
+        <li><a href="/rechnungslauf.php">Rechnungslauf starten</a></li>
+        <li><a href="/offene_posten.php">Offene Posten</a></li>
+    </ul>
+
+    <h3>Mahnungen</h3>
+    <ul>
+        <li><a href="/mahnungen.php">Mahnungen verwalten</a></li>
+    </ul>
+
+    <h3>Konten</h3>
+    <ul>
+        <li><a href="/konten.php">Konten verwalten</a></li>
+        <li><a href="/lastschriften.php">Lastschriften</a></li>
+    </ul>
+
+    <h3>Einstellungen</h3>
+    <ul>
+        <li><a href="/kostenstellen.php">Kostenstellen</a></li>
+    </ul>
+</body>
 </html>

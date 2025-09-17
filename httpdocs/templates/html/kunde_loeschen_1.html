@@ -1,17 +1,61 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Kunde l&ouml;schen</h2>
-    <form action="" method="post">
-      <input name="confirm_delete" type="hidden" value="1">
-      <input type="submit" value="l&ouml;schen">
-      <a href="/kundendaten.php?id=<?php echo urlencode($kunde->kundennummer)?>"><input type="button" value="abbrechen"></a>
-    </form>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kunde löschen</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Kunde löschen</h2>
+    
+    <?php if (isset($kunde) && $kunde): ?>
+        <p>Möchten Sie diesen Kunden wirklich löschen?</p>
+        <table>
+            <tr>
+                <td>Kundennummer:</td>
+                <td><?php safe_echo($kunde->kundennummer) ?></td>
+            </tr>
+            <tr>
+                <td>Name:</td>
+                <td>
+                    <?php 
+                    safe_echo($kunde->name);
+                    if (!empty($kunde->vorname)) {
+                        echo ', ';
+                        safe_echo($kunde->vorname);
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td>Firma:</td>
+                <td><?php safe_echo($kunde->firma) ?></td>
+            </tr>
+            <tr>
+                <td>Ort:</td>
+                <td>
+                    <?php
+                    if (!empty($kunde->plz)) {
+                        safe_echo($kunde->plz . ' ');
+                    }
+                    safe_echo($kunde->ort);
+                    ?>
+                </td>
+            </tr>
+        </table>
+        
+        <form method="post">
+            <input type="hidden" name="cmd" value="delete">
+            <input type="hidden" name="kunde" value="<?php safe_echo($kunde->kundennummer) ?>">
+            <input type="submit" value="Ja, löschen">
+            <a href="/kunden.php">Abbrechen</a>
+        </form>
+    <?php else: ?>
+        <p>Kunde nicht gefunden.</p>
+        <p><a href="/kunden.php">Zurück zur Übersicht</a></p>
+    <?php endif; ?>
+</body>
 </html>

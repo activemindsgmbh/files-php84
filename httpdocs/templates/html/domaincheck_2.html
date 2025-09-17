@@ -1,17 +1,37 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Domaincheck</h2>
-    <?php if(count($domains)){?>
-    <p>Folgende Domains sind nicht in der Datenbank enthalten:</p>
-    <pre><?php foreach($domains as $domain=>$unicode)echo htmlspecialchars($domain.($domain!=$unicode?' [ '.$unicode.' ]':''))."\n"?></pre>
-    <?php }else{?>
-    <?php }?>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Domain Check - Ergebnis</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Domain Check - Ergebnis</h2>
+
+    <?php if (isset($error)): ?>
+        <p class="error"><?php safe_echo($error) ?></p>
+    <?php endif; ?>
+
+    <?php if (isset($results) && is_array($results)): ?>
+        <table>
+            <tr>
+                <th>Domain</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+            <?php foreach ($results as $domain => $result): ?>
+                <tr>
+                    <td><?php safe_echo($domain) ?></td>
+                    <td><?php safe_echo($result['status']) ?></td>
+                    <td><?php safe_echo($result['details']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    <?php endif; ?>
+
+    <p><a href="/domaincheck.php">Neue Prüfung</a></p>
+</body>
 </html>

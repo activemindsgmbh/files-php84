@@ -1,14 +1,22 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h1>[&nbsp;<?php echo htmlspecialchars($artikel->artikelnummer)?>&nbsp;]&nbsp;<?php echo htmlspecialchars($artikel->kurztext)?></h1>
-    <h2>Artikel l&ouml;schen</h2>
-    <p>Artikel gel&ouml;scht</p>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Artikel löschen - Bestätigung</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Artikel löschen - Bestätigung</h2>
+    
+    <?php if (isset($erfolg) && $erfolg): ?>
+        <p class="success">Der Artikel wurde erfolgreich gelöscht.</p>
+    <?php else: ?>
+        <p class="error">Beim Löschen ist ein Fehler aufgetreten.</p>
+    <?php endif; ?>
+    
+    <p><a href="/artikel.php">Zurück zur Übersicht</a></p>
+</body>
 </html>

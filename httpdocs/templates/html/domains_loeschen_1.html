@@ -1,24 +1,55 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Domains l&ouml;schen</h2>
-    <form action="" method="post">
-      <p>
-      <?php while($domain=mysql_fetch_object($rdomains)){?>
-        <?php echo htmlspecialchars($domain->domain_name);if($domain->domain_name!=$domain->domain_utf8name)echo' [ '.htmlspecialchars($domain->domain_utf8name).' ] '?><br>
-      <?php }?>
-      </p>
-      <input name="cmd" type="hidden" value="remove">
-      <input name="confirm" type="hidden" value="1">
-      <input name="ids" type="hidden" value="<?php echo htmlspecialchars($ids)?>">
-      <input type="submit" value="l&ouml;schen">
-      <a href="/index.php"><input type="button" value="abbrechen"></a>
-    </form>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Domain löschen</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Domain löschen</h2>
+    
+    <?php if (isset($domain) && $domain): ?>
+        <p>Möchten Sie diese Domain wirklich löschen?</p>
+        <table>
+            <tr>
+                <td>Domain:</td>
+                <td>
+                    <?php safe_echo($domain->domain_name) ?>
+                    <?php if (str_starts_with((string)$domain->domain_name, 'xn--')): ?>
+                        <br><?php safe_echo($domain->domain_utf8name) ?>
+                    <?php endif; ?>
+                </td>
+            </tr>
+            <tr>
+                <td>Art:</td>
+                <td><?php safe_echo($domain->art) ?></td>
+            </tr>
+            <tr>
+                <td>Start:</td>
+                <td><?php safe_echo($domain->start) ?></td>
+            </tr>
+            <tr>
+                <td>Ende:</td>
+                <td><?php safe_echo($domain->ende) ?></td>
+            </tr>
+            <tr>
+                <td>Status:</td>
+                <td><?php safe_echo($domain->status) ?></td>
+            </tr>
+        </table>
+        
+        <form method="post">
+            <input type="hidden" name="cmd" value="delete">
+            <input type="hidden" name="id" value="<?php safe_echo($domain->id) ?>">
+            <input type="submit" value="Ja, löschen">
+            <a href="/domains.php">Abbrechen</a>
+        </form>
+    <?php else: ?>
+        <p>Domain nicht gefunden.</p>
+        <p><a href="/domains.php">Zurück zur Übersicht</a></p>
+    <?php endif; ?>
+</body>
 </html>

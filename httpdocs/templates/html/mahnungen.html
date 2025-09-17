@@ -1,58 +1,47 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-    <?php if($kunde->rechnungsemail){?>
-    <script type="text/javascript">
-    var state = false;
-    function toggle ()
-    {
-      state = !state;
-      var arr = document.getElementsByName ("id[]");
-      for (var i = 0; i < arr.length; ++i)
-      {
-        arr[i].checked = state;
-      }
-    }
-    </script>
-    <?php }?>
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Mahnungen</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
     <h2>Mahnungen</h2>
-    <?php if(mysql_num_rows($rmahnungen)<1){?>
-    <p>
-      keine Mahnungen
-    </p>
-    <?php }else{?>
-    <?php if($kunde->rechnungsemail){?>
-    <form action="/mahnungen_versenden.php" method="post">
-      <p>
-        <input name="send" type="submit" value="Ausgew&auml;hlte Mahnungen per E-Mail an <?php echo htmlspecialchars($kunde->rechnungsemail)?> verschicken">
-      </p>
-    <?php }?>
-      <table border="1">
-        <tr>
-          <?php if($kunde->rechnungsemail){?><th><input type="checkbox" onclick="toggle()"></th><?php }?>
-          <th>Datum</th>
-          <th>Betrag</th>
-          <th>verschickt</th>
-          <th>PDF</th>
-          <?php if($kunde->rechnungsemail){?><th>E-Mail senden</th><?php }?>
-        </tr>
-        <?php while($mahnung=mysql_fetch_object($rmahnungen)){?>
-        <tr>
-          <?php if($kunde->rechnungsemail){?><td><input name="id[]" type="checkbox" value="<?php echo htmlspecialchars($mahnung->id)?>"></td><?php }?>
-          <td><?php echo htmlspecialchars($mahnung->datum)?></td>
-          <td><?php echo htmlspecialchars(number_format($mahnung->betrag,2,',','.').' '.$mahnung->waehrung)?></td>
-          <td><?php echo htmlspecialchars($mahnung->verschickt)?></td>
-          <td><a href="<?php echo htmlspecialchars($GLOBALS['conf_url_mahnung'])?>/<?php echo htmlspecialchars($mahnung->id)?>.pdf">klick</a></td>
-          <?php if($kunde->rechnungsemail){?><td><a href="/mahnungen_versenden.php?id=<?php echo urlencode($mahnung->id)?>">klick</a></td><?php }?>
-        </tr>
-        <?php }?>
-      </table>
-    <?php }?>
-  </body>
+    
+    <?php if (is_valid_result($result)): ?>
+        <table>
+            <tr>
+                <th>Datum</th>
+                <th>Kunde</th>
+                <th>Betrag</th>
+                <th>Status</th>
+            </tr>
+            <?php while ($mahnung = $result->fetch_object()): ?>
+                <tr>
+                    <td>
+                        <a href="/mahnungen_versenden.php?id=<?php echo safe_url($mahnung->id) ?>">
+                            <?php safe_echo($mahnung->datum) ?>
+                        </a>
+                    </td>
+                    <td>
+                        <?php 
+                        safe_echo($mahnung->kunde_name);
+                        if (!empty($mahnung->kunde_vorname)) {
+                            echo ', ';
+                            safe_echo($mahnung->kunde_vorname);
+                        }
+                        ?>
+                    </td>
+                    <td><?php safe_echo($mahnung->betrag) ?></td>
+                    <td><?php safe_echo($mahnung->status) ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </table>
+    <?php else: ?>
+        <p>Keine Mahnungen gefunden.</p>
+    <?php endif; ?>
+</body>
 </html>

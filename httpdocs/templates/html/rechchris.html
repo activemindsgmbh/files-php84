@@ -1,80 +1,51 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-    <?php if($kunde->rechnungsemail){?>
-    <script type="text/javascript">
-    var state = false;
-    function toggle ()
-    {
-      state = !state;
-      var arr = document.getElementsByName ("id[]");
-      for (var i = 0; i < arr.length; ++i)
-      {
-        arr[i].checked = state;
-      }
-    }
-    </script>
-    <?php }?>
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Rechnungen</h2>
-    <?php if(mysql_num_rows($rrechnungen)<1){?>
-    <p>
-      keine Rechnungen
-    </p>
-    <?php }else{?>
-    <?php if($kunde->rechnungsemail){?>
-    <form action="/rechnungen_versenden.php" method="post">
-      <p>
-        <input name="send" type="submit" value="Ausgew&auml;hlte Rechnungen per E-Mail an <?php echo htmlspecialchars($kunde->rechnungsemail)?> verschicken">
-      </p>
-    <?php }?>
-      <table border="1">
-        <tr>
-          <?php if($kunde->rechnungsemail){?><th><input type="checkbox" onclick="toggle()"></th><?php }?>
-          <th>Nummer</th>
-          <th>Datum</th>
-          <th>F&auml;lligkeitsdatum</th>
-          <th>Status</th>
-          <th>Forderung</th>
-          <th>bezahlt</th>
-          <th>verschickt</th>
-          <th>PDF (Kunde)</th>
-          <th>PDF (intern)</th>
-          <th>bearbeiten</th>
-          <?php if($kunde->rechnungsemail){?><th>E-Mail senden</th><?php }?>
-        </tr>
-        
-        <?php $gesamt = 0; while($rechnung=mysql_fetch_object($rrechnungen)){$gesamt += $rechnung->forderung; ?> 
-        <tr>
-          <?php if($kunde->rechnungsemail){?><td><input name="id[]" type="checkbox" value="<?php echo htmlspecialchars($rechnung->id)?>"></td><?php }?>
-          <td><?php echo htmlspecialchars($rechnung->id)?></td>
-          <td><?php echo htmlspecialchars($rechnung->datum)?></td>
-          <td><?php echo htmlspecialchars($rechnung->faellig)?></td>
-          <td><?php echo htmlspecialchars($rechnung->status)?></td>
-          <td><?php echo htmlspecialchars(number_format($rechnung->forderung,2,',','.').' '.$rechnung->waehrung)?> 
-			
-				
-		
-			
-					 </td>
-          <td><?php if($rechnung->zahlung>0)echo htmlspecialchars(number_format($rechnung->zahlung,2,',','.').' '.$rechnung->waehrung)?></td>
-          <td><?php echo htmlspecialchars($rechnung->verschickt)?></td>
-          <td><a href="<?php echo htmlspecialchars($GLOBALS['conf_url_rechnung_kunde'])?>/<?php echo htmlspecialchars($rechnung->id)?>.pdf">klick</a></td>
-          <td><a href="<?php echo htmlspecialchars($GLOBALS['conf_url_rechnung_intern'])?>/<?php echo htmlspecialchars($rechnung->id)?>.pdf">klick</a></td>
-          <td><a href="/rechnung.php?id=<?php echo urlencode($rechnung->id)?>">klick</a></td>
-          <?php if($kunde->rechnungsemail){?><td><a href="/rechnungen_versenden.php?id=<?php echo urlencode($rechnung->id)?>">klick</a></td><?php }?>
-        </tr>
-        <?php }?>
-      </table>
-      
-      Summe:<?= $gesamt ?>
-      
-    <?php if($kunde->rechnungsemail){?></form><?php }?>
-    <?php }?>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Rechnungen Chris</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Rechnungen Chris</h2>
+
+    <?php if (is_valid_result($result)): ?>
+        <table>
+            <tr>
+                <th>Rechnungsnummer</th>
+                <th>Datum</th>
+                <th>Kunde</th>
+                <th>Betrag</th>
+                <th>Status</th>
+            </tr>
+            <?php while ($rechnung = $result->fetch_object()): ?>
+                <tr>
+                    <td>
+                        <a href="/rechnung.php?nr=<?php echo safe_url($rechnung->rechnungsnummer) ?>">
+                            <?php safe_echo($rechnung->rechnungsnummer) ?>
+                        </a>
+                    </td>
+                    <td><?php safe_echo($rechnung->datum) ?></td>
+                    <td>
+                        <?php 
+                        safe_echo($rechnung->kunde_name);
+                        if (!empty($rechnung->kunde_vorname)) {
+                            echo ', ';
+                            safe_echo($rechnung->kunde_vorname);
+                        }
+                        ?>
+                    </td>
+                    <td><?php safe_echo(number_format($rechnung->betrag, 2, ',', '.')) ?> €</td>
+                    <td><?php safe_echo($rechnung->status) ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </table>
+    <?php else: ?>
+        <p>Keine Rechnungen gefunden.</p>
+    <?php endif; ?>
+
+    <p><a href="/rechnungen.php">Zurück zur Übersicht</a></p>
+</body>
 </html>

@@ -1,120 +1,56 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <?php if($artikel){?>
-    <h1>[&nbsp;<?php echo htmlspecialchars($artikel->artikelnummer)?>&nbsp;]&nbsp;<a href="/artikeldaten.php?id=<?php echo urlencode($artikel->id)?>"><?php echo htmlspecialchars($artikel->kurztext)?></a></h1>
-    <h2>Artikel bearbeiten</h2>
-    <?php }else{?>
-    <h2>Artikel erfassen</h2>
-    <?php }?>
-    <form action="" method="post" name="theForm">
-      <table>
-        <tr>
-          <th>Artikelnummer*</th>
-          <td>
-            <?php if($artikel)echo $artikel->artikelnummer;else{?><input name="artikelnummer" type="text" value="<?=post_value('artikelnummer')?>" size="10" maxlength="10"><?php }?>
-            <?php errormsg('artikel.artikelnummer')?>
-            <div><input name="domainreg" type="checkbox" value="1"<?php if(post_value('domainreg')==='1')echo' checked'?>>Domainregistrierung</div>
-          </td>
-        </tr>
-        <tr>
-          <th>Artikeltext*</th>
-          <td>
-            <input name="kurztext" type="text" value="<?=post_value('kurztext')?>" size="48" maxlength="255">
-            <?php errormsg('artikel.kurztext')?>
-          </td>
-        </tr>
-        <tr>
-          <th>Artikellangtext</th>
-          <td>
-            <textarea name="langtext" cols="60" rows="6" wrap="virtual"><?=post_value('langtext')?></textarea><br>
-            <input name="textanzeige" type="checkbox" value="1"<?php if(post_value('textanzeige')=='1')echo' checked'?>>
-            Artikellangtext auf Rechnung ausgeben
-          </td>
-        </tr>
-        <tr>
-          <th>Preis*</th>
-          <td>
-            <input name="preis" type="text" value="<?=post_value('preis')?>" size="10" maxlength="13">
-            <?php errormsg('artikel.preis')?>
-          </td>
-        </tr>
-        <tr>
-          <th>Setup</th>
-          <td>
-            <input name="setup" type="text" value="<?=post_value('setup')?>" size="10" maxlength="13">
-            <?php errormsg('artikel.setup')?>
-          </td>
-        </tr>
-        <tr>
-          <th>Umsatzsteuersatz</th>
-          <td>
-            <input name="umsatzsteuer" type="text" value="<?=post_value('umsatzsteuer')?>" size="5" maxlength="5">
-            <?php errormsg('artikel.umsatzsteuer')?>
-          </td>
-        </tr>
-        <tr>
-          <th>Fibu Kontonummer*</th>
-          <td>
-            <input name="fibukonto" type="text" value="<?=post_value('fibukonto')?>" size="4" maxlength="4">
-            <?php errormsg('artikel.fibukonto')?>
-          </td>
-        </tr>
-        <tr>
-          <th>Abrechnungsintervall</th>
-          <td>
-            <input name="intervall" type="text" value="<?=post_value('intervall')?>" size="4" maxlength="4"> Monate
-            <?php errormsg('artikel.intervall')?>
-          </td>
-        </tr>
-        <tr>
-          <th>Domains</th>
-          <td>
-            <input name="domains" type="text" value="<?=post_value('domains')?>" size="3" maxlength="3">
-            <?php errormsg('artikel.domains')?>
-          </td>
-        </tr>
-      </table>
-      <input type="submit" value="speichern">
-      <a href="/artikel.php"><input type="button" value="abbrechen"></a>
-      <?php if($artikel){?><a href="/artikel_loeschen.php?id=<?php echo urlencode($artikel->id)?>"><input type="button" value="l&ouml;schen"></a><?php }?>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Artikeldaten</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Artikeldaten</h2>
+    
+    <?php if (isset($error)): ?>
+        <p class="error"><?php safe_echo($error) ?></p>
+    <?php endif; ?>
+
+    <form method="post">
+        <input type="hidden" name="cmd" value="save">
+        <table>
+            <tr>
+                <td>Artikelnummer:</td>
+                <td><input type="text" name="artikelnummer" value="<?php safe_echo(post_value('artikelnummer')) ?>" size="10"></td>
+            </tr>
+            <tr>
+                <td>Bezeichnung:</td>
+                <td><input type="text" name="bezeichnung" value="<?php safe_echo(post_value('bezeichnung')) ?>" size="40"></td>
+            </tr>
+            <tr>
+                <td>Art:</td>
+                <td>
+                    <select name="art">
+                        <option value="Domain"<?php echo post_value('art') === 'Domain' ? ' selected' : '' ?>>Domain</option>
+                        <option value="Hosting"<?php echo post_value('art') === 'Hosting' ? ' selected' : '' ?>>Hosting</option>
+                        <option value="Service"<?php echo post_value('art') === 'Service' ? ' selected' : '' ?>>Service</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Preis:</td>
+                <td><input type="number" name="preis" value="<?php safe_echo(post_value('preis')) ?>" step="0.01"></td>
+            </tr>
+            <tr>
+                <td>Status:</td>
+                <td>
+                    <select name="status">
+                        <option value="aktiv"<?php echo post_value('status') === 'aktiv' ? ' selected' : '' ?>>aktiv</option>
+                        <option value="inaktiv"<?php echo post_value('status') === 'inaktiv' ? ' selected' : '' ?>>inaktiv</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" value="Speichern">
     </form>
-    <hr>
-    <?php if($artikel){?>
-    <h2>Artikelupdates ( <a href="/artikelupdate.php?id=<?php echo urlencode($artikel->id)?>">&auml;ndern</a> )</h2>
-    <?php
-    $query  = 'SELECT';
-    $query .= ' preis';
-    $query .= ',setup';
-    $query .= ',DATE_FORMAT(termin,\'%d.%m.%Y\') AS termin';
-    $query .= ' FROM artikelupdate';
-    $query .= ' WHERE artikel=' . (int)$id;
-    $query .= ' ORDER BY artikelupdate.termin';
-    $res = safe_mysql_query ($query);
-    if (mysql_num_rows($res))
-    {
-    ?>
-    <table border="1">
-      <tr>
-        <th>Termin</th>
-        <th>Preis</th>
-        <th>Setup</th>
-      </tr>
-      <?php while($obj=mysql_fetch_object($res)){?>
-      <tr>
-        <td><?php echo htmlspecialchars($obj->termin)?></td>
-        <td align="right"><?php if($obj->preis!==NULL)echo htmlspecialchars(number_format($obj->preis,2,',','.'))?></td>
-        <td align="right"><?php if($obj->setup!==NULL)echo htmlspecialchars(number_format($obj->setup,2,',','.'))?></td>
-      </tr>
-      <?php }?>
-    </table>
-    <?php }?>
-    <?php }?>
-  </body>
+</body>
 </html>

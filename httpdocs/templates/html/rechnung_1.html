@@ -1,93 +1,96 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Rechnung bearbeiten</h2>
-    <?php if($rechnung->status=='ERLEDIGT'){?>
-    <form action="" method="post">
-      <input name="cmd" type="hidden" value="RUECKLASTSCHRIFT">
-      <input name="submit" type="submit" value="Status &raquo; R&uuml;cklastschrift">
-    </form>
-    <?php }else if($rechnung->status=='STORNO'){?>
-    <form action="" method="post">
-      <input name="cmd" type="hidden" value="UNSTORNO">
-      <input name="submit" type="submit" value="Status &raquo; offen">
-    </form>
-    <?php }else{?>
-    <?php if(!(float)$rechnung->zahlung){?>
-    <p>
-      <form action="" method="post">
-        <input name="cmd" type="hidden" value="STORNO">
-        <input name="submit" type="submit" value="Status &raquo; storniert">
-      </form>
-    </p>
-    <?php }?>
-    <p>
-      <form action="" method="post">
-        <input name="cmd" type="hidden" value="BEZAHLT">
-        <input name="submit" type="submit" value="Status &raquo; bezahlt"><br>
-				<?php	$konten=safe_mysql_query('SELECT id,name FROM konto WHERE hidden=0 ORDER BY name,id');if(mysql_num_rows($konten)){?>
-				Datum: <input name="datum" type="text" value="<?php if(post_value('cmd')=='BEZAHLT')echo post_value('datum')?>" size="10" maxlength="24"><br>
-				<?php if(post_value('cmd')=='BEZAHLT'){?>
-				<?php if(error('datum')=='EMPTY'){?><div class="errormsg">Datum fehlt</div>
-				<?php }else if(error('datum')=='INVALID'){?><div class="errormsg">Datum ist ung&uuml;ltig</div>
-				<?php }?>
-				<?php }?>
-				Konto:<br>
-				<input name="konto" type="radio" value="0"<?php if(!post_value('konto'))echo' checked'?>> keine Angabe<br>
-				<?php while($konto=mysql_fetch_object($konten)){?>
-				<input name="konto" type="radio" value="<?php echo htmlspecialchars($konto->id)?>"<?php if(post_value('konto')==$konto->id)echo' checked'?>> <?php echo htmlspecialchars($konto->name)?><br>
-				<?php }}?>
-      </form>
-    </p>
-    <p>
-      <form action="" method="post">
-        <input name="cmd" type="hidden" value="TEILZAHLUNG">
-        Forderung: <?php echo number_format($rechnung->forderung,2,',','.')?> <?php echo htmlspecialchars($rechnung->waehrung)?><br>
-        bezahlt: <?php echo number_format($rechnung->zahlung,2,',','.')?> <?php echo htmlspecialchars($rechnung->waehrung)?><br>
-        Rest: <?php echo number_format($rechnung->forderung-$rechnung->zahlung,2,',','.')?> <?php echo htmlspecialchars($rechnung->waehrung)?><br>
-        Betrag:
-        <input name="betrag" type="text" value="<?php echo post_value('betrag')?>" size="10" maxlength="13">
-        <input name="submit" type="submit" value="Status &raquo; Teilzahlung"><br>
-        <?php if(error('betrag')=='EXCESS'){?><div class="errormsg">Betrag ist zu hoch</div>
-        <?php }else if(error('betrag')=='EMPTY'){?><div class="errormsg">Betrag fehlt</div>
-        <?php }else if(error('betrag')=='INVALID'){?><div class="errormsg">Betrag ist ung&uuml;ltig</div>
-        <?php }else if(error('betrag')){?><div class="errormsg">unbekannter Fehler</div><?php }?>
-				<?php	$konten=safe_mysql_query('SELECT id,name FROM konto WHERE hidden=0 ORDER BY name,id');if(mysql_num_rows($konten)){?>
-				Datum: <input name="datum" type="text" value="<?php if(post_value('cmd')=='TEILZAHLUNG')echo post_value('datum')?>" size="10" maxlength="24"><br>
-				<?php if(post_value('cmd')=='TEILZAHLUNG'){?>
-				<?php if(error('datum')=='EMPTY'){?><div class="errormsg">Datum fehlt</div>
-				<?php }else if(error('datum')=='INVALID'){?><div class="errormsg">Datum ist ung&uuml;ltig</div>
-				<?php }?>
-				<?php }?>
-				Konto:<br>
-				<input name="konto" type="radio" value="0"<?php if(!post_value('konto'))echo' checked'?>> keine Angabe<br>
-				<?php while($konto=mysql_fetch_object($konten)){?>
-				<input name="konto" type="radio" value="<?php echo htmlspecialchars($konto->id)?>"<?php if(post_value('konto')==$konto->id)echo' checked'?>> <?php echo htmlspecialchars($konto->name)?><br>
-				<?php }}?>
-      </form>
-    </p>
-    <?php }?>
-		<h3>Verlauf</h3>
-		<table border="0" cellpadding="2" cellspacing="0">
-		<?php $res=safe_mysql_query('SELECT DATE_FORMAT(rechnungslog.ctime,\'%d.%m.%Y %H:%i\') AS ctime,DATE_FORMAT(rechnungslog.datum,\'%d.%m.%Y\') AS datum,rechnungslog.aktion,rechnungslog.betrag,konto.name FROM rechnungslog LEFT JOIN konto ON konto.id=rechnungslog.konto WHERE rechnungslog.rechnung='.(int)$rechnung->id.' ORDER BY rechnungslog.ctime DESC');while($obj=mysql_fetch_object($res)){?>
-		<tr>
-			<td valign="top"><b><?php echo htmlspecialchars($obj->ctime)?></b></td>
-			<td valign="top">
-				<?php echo htmlspecialchars($obj->aktion)?><br>
-				<?php if($obj->aktion=='ZAHLUNG'){?>
-				Datum: <?php echo htmlspecialchars($obj->datum)?><br>
-				Betrag: <?php echo number_format($obj->betrag,2,',','.')?> <?php echo htmlspecialchars($rechnung->waehrung)?><br>
-				Bank: <?php echo htmlspecialchars($obj->name)?>
-				<?php }?>
-			</td>
-		</tr>
-		<?php }?>
-		</table>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Rechnung</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Rechnung</h2>
+    
+    <?php if (isset($rechnung) && $rechnung): ?>
+        <table>
+            <tr>
+                <td>Rechnungsnummer:</td>
+                <td><?php safe_echo($rechnung->rechnungsnummer) ?></td>
+            </tr>
+            <tr>
+                <td>Datum:</td>
+                <td><?php safe_echo($rechnung->datum) ?></td>
+            </tr>
+            <tr>
+                <td>Kunde:</td>
+                <td>
+                    <?php 
+                    safe_echo($rechnung->kunde_name);
+                    if (!empty($rechnung->kunde_vorname)) {
+                        echo ', ';
+                        safe_echo($rechnung->kunde_vorname);
+                    }
+                    if (!empty($rechnung->kunde_firma)) {
+                        echo '<br>';
+                        safe_echo($rechnung->kunde_firma);
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <td>Status:</td>
+                <td><?php safe_echo($rechnung->status) ?></td>
+            </tr>
+        </table>
+
+        <?php if (is_valid_result($positionen)): ?>
+            <h3>Positionen</h3>
+            <table>
+                <tr>
+                    <th>Pos</th>
+                    <th>Artikel</th>
+                    <th>Bezeichnung</th>
+                    <th>Menge</th>
+                    <th>Preis</th>
+                    <th>Gesamt</th>
+                </tr>
+                <?php 
+                $summe = 0;
+                while ($pos = $positionen->fetch_object()): 
+                    $gesamt = $pos->menge * $pos->preis;
+                    $summe += $gesamt;
+                ?>
+                    <tr>
+                        <td><?php safe_echo($pos->position) ?></td>
+                        <td><?php safe_echo($pos->artikel) ?></td>
+                        <td><?php safe_echo($pos->bezeichnung) ?></td>
+                        <td><?php safe_echo($pos->menge) ?></td>
+                        <td><?php safe_echo(number_format($pos->preis, 2, ',', '.')) ?> €</td>
+                        <td><?php safe_echo(number_format($gesamt, 2, ',', '.')) ?> €</td>
+                    </tr>
+                <?php endwhile; ?>
+                <tr>
+                    <td colspan="5"><strong>Summe:</strong></td>
+                    <td><strong><?php safe_echo(number_format($summe, 2, ',', '.')) ?> €</strong></td>
+                </tr>
+            </table>
+        <?php endif; ?>
+
+        <?php if ($rechnung->status === 'offen'): ?>
+            <form method="post">
+                <input type="hidden" name="cmd" value="mark_paid">
+                <input type="hidden" name="nr" value="<?php safe_echo($rechnung->rechnungsnummer) ?>">
+                <input type="submit" value="Als bezahlt markieren">
+            </form>
+        <?php endif; ?>
+
+        <p>
+            <a href="/rechnungen.php">Zurück zur Übersicht</a>
+            <a href="/rechnungsvorschau.php?nr=<?php echo safe_url($rechnung->rechnungsnummer) ?>" target="_blank">PDF-Vorschau</a>
+        </p>
+    <?php else: ?>
+        <p>Rechnung nicht gefunden.</p>
+        <p><a href="/rechnungen.php">Zurück zur Übersicht</a></p>
+    <?php endif; ?>
+</body>
 </html>

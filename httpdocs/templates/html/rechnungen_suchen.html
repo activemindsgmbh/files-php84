@@ -1,52 +1,106 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Rechnungen suchen</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
     <h2>Rechnungen suchen</h2>
-    <form action="/rechnungen_suchen.php" method="post">
-      <p>
-        Rechnungsnummer
-        <input name="pattern" type="text" value="<?php echo post_value('pattern')?>" size="24" maxlength="255">
-        <input name="send" type="submit" value="Rechnungen anzeigen">
-      </p>
+    
+    <form method="post">
+        <table>
+            <tr>
+                <td>Rechnungsnummer:</td>
+                <td>
+                    <input type="text" name="rechnungsnummer" value="<?php safe_echo(post_value('rechnungsnummer')) ?>" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>Kunde:</td>
+                <td>
+                    <select name="kunde">
+                        <option value="">- Bitte wählen -</option>
+                        <?php if (is_valid_result($rkunde)):
+                            while ($kunde = $rkunde->fetch_object()): ?>
+                                <option value="<?php safe_echo($kunde->kundennummer) ?>"
+                                    <?php echo ((string)$kunde->kundennummer === (string)post_value('kunde')) ? ' selected' : '' ?>>
+                                    <?php 
+                                    safe_echo($kunde->name);
+                                    if (!empty($kunde->vorname)) {
+                                        echo ', ';
+                                        safe_echo($kunde->vorname);
+                                    }
+                                    ?>
+                                </option>
+                            <?php endwhile;
+                        endif; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Datum von:</td>
+                <td>
+                    <input type="date" name="datum_von" value="<?php safe_echo(post_value('datum_von')) ?>">
+                </td>
+            </tr>
+            <tr>
+                <td>Datum bis:</td>
+                <td>
+                    <input type="date" name="datum_bis" value="<?php safe_echo(post_value('datum_bis')) ?>">
+                </td>
+            </tr>
+            <tr>
+                <td>Status:</td>
+                <td>
+                    <select name="status">
+                        <option value="">- Alle -</option>
+                        <option value="offen"<?php echo post_value('status') === 'offen' ? ' selected' : '' ?>>offen</option>
+                        <option value="bezahlt"<?php echo post_value('status') === 'bezahlt' ? ' selected' : '' ?>>bezahlt</option>
+                        <option value="storniert"<?php echo post_value('status') === 'storniert' ? ' selected' : '' ?>>storniert</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" value="Suchen">
     </form>
-    <?php if(mysql_num_rows($rrechnungen)){?>
-    <div>&nbsp;</div>
-    <table border="1">
-      <tr>
-        <th>Nummer</th>
-        <th>Kunde</th>
-        <th>Datum</th>
-        <th>F&auml;lligkeitsdatum</th>
-        <th>Status</th>
-        <th>Forderung</th>
-        <th>bezahlt</th>
-        <th>verschickt</th>
-        <th>PDF (Kunde)</th>
-        <th>PDF (intern)</th>
-        <th>bearbeiten</th>
-      </tr>
-      <?php while($rechnung=mysql_fetch_object($rrechnungen)){?>
-      <tr>
-        <td><?php echo htmlspecialchars($rechnung->id)?></td>
-        <td><a href="/kundendaten.php?kunde=<?php echo urlencode($rechnung->kundennummer)?>"><?php echo htmlspecialchars($rechnung->name);if($rechnung->vorname)echo', '.htmlspecialchars($rechnung->vorname)?></a></td>
-        <td><?php echo htmlspecialchars($rechnung->datum)?></td>
-        <td><?php echo htmlspecialchars($rechnung->faellig)?></td>
-        <td><?php echo htmlspecialchars($rechnung->status)?></td>
-        <td><?php echo htmlspecialchars(number_format($rechnung->forderung,2,',','.').' '.$rechnung->waehrung)?></td>
-        <td><?php if($rechnung->zahlung>0)echo htmlspecialchars(number_format($rechnung->zahlung,2,',','.').' '.$rechnung->waehrung)?></td>
-        <td><?php echo htmlspecialchars($rechnung->verschickt)?></td>
-        <td><a href="<?php echo htmlspecialchars($GLOBALS['conf_url_rechnung_kunde'])?>/<?php echo htmlspecialchars($rechnung->id)?>.pdf">klick</a></td>
-        <td><a href="<?php echo htmlspecialchars($GLOBALS['conf_url_rechnung_intern'])?>/<?php echo htmlspecialchars($rechnung->id)?>.pdf">klick</a></td>
-        <td><a href="/rechnung.php?id=<?php echo urlencode($rechnung->id)?>">klick</a></td>
-      </tr>
-      <?php }?>
-    </table>
-    <?php }?>
-  </body>
+
+    <?php if (is_valid_result($result)): ?>
+        <table>
+            <tr>
+                <th>Nr</th>
+                <th>Datum</th>
+                <th>Kunde</th>
+                <th>Betrag</th>
+                <th>Status</th>
+            </tr>
+            <?php while ($rechnung = $result->fetch_object()): ?>
+                <tr>
+                    <td>
+                        <a href="/rechnung.php?nr=<?php echo safe_url($rechnung->rechnungsnummer) ?>">
+                            <?php safe_echo($rechnung->rechnungsnummer) ?>
+                        </a>
+                    </td>
+                    <td><?php safe_echo($rechnung->datum) ?></td>
+                    <td>
+                        <?php 
+                        safe_echo($rechnung->kunde_name);
+                        if (!empty($rechnung->kunde_vorname)) {
+                            echo ', ';
+                            safe_echo($rechnung->kunde_vorname);
+                        }
+                        ?>
+                    </td>
+                    <td><?php safe_echo($rechnung->betrag) ?></td>
+                    <td><?php safe_echo($rechnung->status) ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </table>
+    <?php elseif (isset($search_performed) && $search_performed): ?>
+        <p>Keine Rechnungen gefunden.</p>
+    <?php endif; ?>
+</body>
 </html>

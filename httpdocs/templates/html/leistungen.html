@@ -5,37 +5,80 @@
     <meta charset="UTF-8">
     <title>Leistungen</title>
     <link rel="stylesheet" type="text/css" href="/default.css">
+    <script>
+        function toggleCheckboxes() {
+            const checkboxes = document.querySelectorAll('input[name="id[]"]');
+            const mainCheckbox = document.getElementById('toggleAll');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = mainCheckbox.checked;
+            });
+        }
+    </script>
 </head>
 <body>
     <?php @include('header.inc.html') ?>
 
     <h2>Leistungen</h2>
-    
-    <?php if (is_valid_result($result)): ?>
-        <table>
-            <tr>
-                <th>Datum</th>
-                <th>Artikel</th>
-                <th>Bezeichnung</th>
-                <th>Preis</th>
-                <th>Status</th>
-            </tr>
-            <?php while ($leistung = $result->fetch_object()): ?>
-                <tr>
-                    <td>
-                        <a href="/leistung.php?id=<?php echo safe_url($leistung->id) ?>">
-                            <?php safe_echo($leistung->datum) ?>
-                        </a>
-                    </td>
-                    <td><?php safe_echo($leistung->artikel) ?></td>
-                    <td><?php safe_echo($leistung->bezeichnung) ?></td>
-                    <td><?php safe_echo($leistung->preis) ?></td>
-                    <td><?php safe_echo($leistung->status) ?></td>
-                </tr>
-            <?php endwhile; ?>
-        </table>
+
+    <?php if (!is_valid_result($rleistungen) || $rleistungen->num_rows === 0): ?>
+        <p>Keine Leistungen vorhanden.</p>
     <?php else: ?>
-        <p>Keine Leistungen gefunden.</p>
+        <form action="/leistungen_loeschen.php" method="post">
+            <p>
+                <input type="submit" name="remove" value="Ausgewählte Leistungen löschen" 
+                       onclick="return confirm('Möchten Sie die ausgewählten Leistungen wirklich löschen?');">
+            </p>
+            <table>
+                <tr>
+                    <th><input type="checkbox" id="toggleAll" onclick="toggleCheckboxes()"></th>
+                    <th>Anzahl</th>
+                    <th>Artikelnummer</th>
+                    <th>Rechnungstext</th>
+                    <th>Preis</th>
+                    <th>Setup</th>
+                    <th>Abrechnungsbeginn</th>
+                    <th>Zuletzt abgerechnet</th>
+                    <th>Abrechnungsende</th>
+                </tr>
+                <?php while ($leistung = $rleistungen->fetch_object()): ?>
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="id[]" value="<?php safe_echo($leistung->id) ?>">
+                        </td>
+                        <td class="text-right">
+                            <?php safe_echo(number_format($leistung->anzahl, 2, ',', '.')) ?>
+                        </td>
+                        <td><?php safe_echo($leistung->artikelnummer) ?></td>
+                        <td>
+                            <a href="/leistung.php?id=<?php echo safe_url($leistung->id) ?>">
+                                <?php echo nl2br(safe_echo($leistung->kommentar, false)) ?>
+                            </a>
+                        </td>
+                        <td class="text-right">
+                            <?php safe_echo(number_format($leistung->preis, 2, ',', '.')) ?> €
+                        </td>
+                        <td>
+                            <?php if (!empty($leistung->setup)): ?>
+                                <?php safe_echo(number_format($leistung->setup, 2, ',', '.')) ?> €
+                            <?php endif; ?>
+                        </td>
+                        <td><?php safe_echo($leistung->abrechnungsbeginn) ?></td>
+                        <td><?php safe_echo($leistung->letzteabrechnung) ?></td>
+                        <td><?php safe_echo($leistung->abrechnungsende) ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            </table>
+
+            <?php if (isset($summe) && $summe > 0): ?>
+                <p class="text-right">
+                    <strong>Gesamtsumme: <?php safe_echo(number_format($summe, 2, ',', '.')) ?> €</strong>
+                </p>
+            <?php endif; ?>
+        </form>
     <?php endif; ?>
+
+    <p>
+        <a href="/leistung.php" class="button">Neue Leistung erfassen</a>
+    </p>
 </body>
 </html>

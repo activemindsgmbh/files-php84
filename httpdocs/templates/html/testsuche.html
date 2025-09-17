@@ -1,41 +1,45 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title>testsuche</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Kunde suchen</h2>
-    <form action="/testsuche.php" method="post">
-      <p>
-        Kunde
-        <input name="pattern" type="text" value="<?php echo post_value('pattern')?>" size="24" maxlength="255">
-        <input name="send" type="submit" value="Kunde anzeigen">
-      </p>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Testsuche</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Testsuche</h2>
+
+    <form method="post">
+        <input type="hidden" name="cmd" value="search">
+        <table>
+            <tr>
+                <td>Suchbegriff:</td>
+                <td><input type="text" name="query" value="<?php safe_echo(post_value('query')) ?>" size="40"></td>
+            </tr>
+        </table>
+        <input type="submit" value="Suchen">
     </form>
-    <?php if(mysql_num_rows($rkunde)){?>
-    <div>&nbsp;</div>
-    <table border="1">
-      <tr>
 
-        <th>Kunde</th>
-     
-
-
-      </tr>
-      <?php while($rkunde=mysql_fetch_object($rkunde)){?>
-      <tr>
-       
-        <td><a href="/kundendaten.php?kunde=<?php echo urlencode($rkunde->kundennummer)?>"><?php echo htmlspecialchars($rkunde->name);if($rkunde->vorname)echo', '.htmlspecialchars($rkunde->vorname)?></a></td>
-
-  
-  
-
-      </tr>
-      <?php }?>
-    </table>
-    <?php }?>
-  </body>
+    <?php if (isset($result) && is_valid_result($result)): ?>
+        <h3>Suchergebnisse</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Beschreibung</th>
+            </tr>
+            <?php while ($item = $result->fetch_object()): ?>
+                <tr>
+                    <td><?php safe_echo($item->id) ?></td>
+                    <td><?php safe_echo($item->name) ?></td>
+                    <td><?php safe_echo($item->description) ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </table>
+    <?php elseif (isset($cmd) && $cmd === 'search'): ?>
+        <p>Keine Ergebnisse gefunden.</p>
+    <?php endif; ?>
+</body>
 </html>

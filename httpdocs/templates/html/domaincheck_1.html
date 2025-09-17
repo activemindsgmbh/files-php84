@@ -1,24 +1,41 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Domaincheck</h2>
-    <form action="" method="post">
-      <table border="1">
-        <tr>
-          <th>Domains*</th>
-          <td>
-            <textarea name="domains" cols="60" rows="16" wrap="virtual"><?=post_value('domains')?></textarea>
-            <?php errormsg('domains')?>
-          </td>
-        </tr>
-      </table>
-      <input type="submit" value="&uuml;berpr&uuml;fen">
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Domain Check</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Domain Check</h2>
+
+    <form method="post">
+        <input type="hidden" name="cmd" value="check">
+        <table>
+            <tr>
+                <td>Domains:</td>
+                <td>
+                    <textarea name="domains" cols="60" rows="10"><?php safe_echo(post_value('domains')) ?></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>Registrar:</td>
+                <td>
+                    <select name="registrar">
+                        <?php if (isset($registrare) && is_array($registrare)):
+                            foreach ($registrare as $reg): ?>
+                                <option value="<?php safe_echo($reg) ?>"<?php echo post_value('registrar') === $reg ? ' selected' : '' ?>>
+                                    <?php safe_echo($reg) ?>
+                                </option>
+                            <?php endforeach;
+                        endif; ?>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" value="Prüfen">
     </form>
-  </body>
+</body>
 </html>

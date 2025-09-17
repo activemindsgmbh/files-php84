@@ -1,42 +1,50 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h2>Leistungen l&ouml;schen</h2>
-    <table border="1">
-      <tr>
-        <th>anzahl</th>
-        <th>Artikelnummer</th>
-        <th>Rechnungstext</th>
-        <th>Preis</th>
-        <th>Setup</th>
-        <th>Abrechnungsbeginn</th>
-        <th>zuletzt abgerechnet</th>
-        <th>Abrechnungsende</th>
-      </tr>
-      <?php while($leistung=mysql_fetch_object($rleistungen)){?>
-      <tr>
-        <td><?php echo htmlspecialchars(number_format($leistung->anzahl,2,',','.'))?></td>
-        <td align="right"><?php echo htmlspecialchars($leistung->artikelnummer)?></td>
-        <td><?php echo htmlspecialchars($leistung->kommentar)?></td>
-        <td align="right"><?php echo htmlspecialchars(number_format($leistung->preis,2,',','.'))?></td>
-        <td align="right"><?php echo htmlspecialchars(number_format($leistung->setup,2,',','.'))?></td>
-        <td align="center"><?php echo htmlspecialchars($leistung->referenzdatum)?></td>
-        <td align="center"><?php echo htmlspecialchars($leistung->abgerechnet)?></td>
-        <td align="center"><?php echo htmlspecialchars($leistung->endedatum)?></td>
-      </tr>
-      <?php }?>
-    </table>
-    <form action="" method="post">
-      <input name="confirm" type="hidden" value="1">
-      <input name="ids" type="hidden" value="<?php echo htmlspecialchars($ids)?>">
-      <input type="submit" value="l&ouml;schen">
-      <a href="/index.php"><input type="button" value="abbrechen"></a>
-    </form>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Leistung löschen</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Leistung löschen</h2>
+    
+    <?php if (isset($leistung) && $leistung): ?>
+        <p>Möchten Sie diese Leistung wirklich löschen?</p>
+        <table>
+            <tr>
+                <td>Datum:</td>
+                <td><?php safe_echo($leistung->datum) ?></td>
+            </tr>
+            <tr>
+                <td>Artikel:</td>
+                <td><?php safe_echo($leistung->artikel) ?></td>
+            </tr>
+            <tr>
+                <td>Bezeichnung:</td>
+                <td><?php safe_echo($leistung->bezeichnung) ?></td>
+            </tr>
+            <tr>
+                <td>Preis:</td>
+                <td><?php safe_echo($leistung->preis) ?></td>
+            </tr>
+            <tr>
+                <td>Status:</td>
+                <td><?php safe_echo($leistung->status) ?></td>
+            </tr>
+        </table>
+        
+        <form method="post">
+            <input type="hidden" name="cmd" value="delete">
+            <input type="hidden" name="id" value="<?php safe_echo($leistung->id) ?>">
+            <input type="submit" value="Ja, löschen">
+            <a href="/leistungen.php">Abbrechen</a>
+        </form>
+    <?php else: ?>
+        <p>Leistung nicht gefunden.</p>
+        <p><a href="/leistungen.php">Zurück zur Übersicht</a></p>
+    <?php endif; ?>
+</body>
 </html>

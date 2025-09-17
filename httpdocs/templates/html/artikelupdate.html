@@ -1,66 +1,58 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="/default.css">
-  </head>
-  <body>
-    <?php @include('header.inc.html')?>
-    <h1>[&nbsp;<?php echo htmlspecialchars($artikel->artikelnummer)?>&nbsp;]&nbsp;<a href="/artikeldaten.php?id=<?php echo urlencode($artikel->id)?>"><?php echo htmlspecialchars($artikel->kurztext)?></a></h1>
-    <h2>Artikelupdates</h2>
-    <p>
-      Preis: <?php echo htmlspecialchars(number_format($artikel->preis,2,',','.'))?><br>
-      Setup: <?php echo htmlspecialchars(number_format($artikel->setup,2,',','.'))?>
-    </p>
-    <form action="" method="post">
-      <table>
-        <?php
-        reset ($_POST['preis']);
-        reset ($_POST['setup']);
-        reset ($_POST['termin']);
-        $index = 0;
-        while (1)
-        {
-          if (!(($preis = each($_POST['preis'])) && ($setup = each($_POST['setup'])) && ($termin = each ($_POST['termin']))))
-          {
-            break;
-          }
-          if ($preis[1] !== '' || $setup[1] !== '' || $termin[1] !== '')
-          {
-        ?>
-        <tr>
-          <td>
-            Datum: <input name="termin[]" type="text" value="<?php echo form_value($termin[1])?>" size="10" maxlength="16">
-            Preis: <input name="preis[]" type="text" value="<?php echo form_value($preis[1])?>" size="10" maxlength="13">
-            Setup: <input name="setup[]" type="text" value="<?php echo form_value($setup[1])?>" size="10" maxlength="13">
-            <?php errormsg('artikelupdate.termin['.$index.']','artikelupdate.termin')?>
-            <?php errormsg('artikelupdate.preis['.$index.']','artikelupdate.preis')?>
-            <?php errormsg('artikelupdate.setup['.$index.']','artikelupdate.setup')?>
-          </td>
-        </tr>
-        <?php
-          }
-          ++$index;
-        }
-        ?>
-        <tr>
-          <td>
-            Datum: <input name="termin[]" type="text" value="" size="10" maxlength="13">
-            Preis: <input name="preis[]" type="text" value="" size="10" maxlength="13">
-            Setup: <input name="setup[]" type="text" value="" size="10" maxlength="13">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            Datum: <input name="termin[]" type="text" value="" size="10" maxlength="13">
-            Preis: <input name="preis[]" type="text" value="" size="10" maxlength="13">
-            Setup: <input name="setup[]" type="text" value="" size="10" maxlength="13">
-          </td>
-        </tr>
-      </table>
-      <input type="submit" value="speichern">
-      <a href="/artikeldaten.php?id=<?php echo urlencode($artikel->id)?>"><input type="button" value="zum Artikel"></a>
-    </form>
-  </body>
+<?php require_once('_template_init.php'); ?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Artikel aktualisieren</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+</head>
+<body>
+    <?php @include('header.inc.html') ?>
+
+    <h2>Artikel aktualisieren</h2>
+
+    <?php if (isset($artikel) && $artikel): ?>
+        <form method="post">
+            <input type="hidden" name="cmd" value="update">
+            <input type="hidden" name="artikel" value="<?php safe_echo($artikel->artikelnummer) ?>">
+            <table>
+                <tr>
+                    <td>Artikelnummer:</td>
+                    <td><?php safe_echo($artikel->artikelnummer) ?></td>
+                </tr>
+                <tr>
+                    <td>Bezeichnung:</td>
+                    <td><input type="text" name="bezeichnung" value="<?php safe_echo(post_value('bezeichnung', $artikel->bezeichnung)) ?>" size="40"></td>
+                </tr>
+                <tr>
+                    <td>Art:</td>
+                    <td>
+                        <select name="art">
+                            <option value="Domain"<?php echo post_value('art', $artikel->art) === 'Domain' ? ' selected' : '' ?>>Domain</option>
+                            <option value="Hosting"<?php echo post_value('art', $artikel->art) === 'Hosting' ? ' selected' : '' ?>>Hosting</option>
+                            <option value="Service"<?php echo post_value('art', $artikel->art) === 'Service' ? ' selected' : '' ?>>Service</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Preis:</td>
+                    <td><input type="number" name="preis" value="<?php safe_echo(post_value('preis', $artikel->preis)) ?>" step="0.01"></td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td>
+                        <select name="status">
+                            <option value="aktiv"<?php echo post_value('status', $artikel->status) === 'aktiv' ? ' selected' : '' ?>>aktiv</option>
+                            <option value="inaktiv"<?php echo post_value('status', $artikel->status) === 'inaktiv' ? ' selected' : '' ?>>inaktiv</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <input type="submit" value="Aktualisieren">
+        </form>
+    <?php else: ?>
+        <p>Artikel nicht gefunden.</p>
+        <p><a href="/artikel.php">Zurück zur Übersicht</a></p>
+    <?php endif; ?>
+</body>
 </html>
