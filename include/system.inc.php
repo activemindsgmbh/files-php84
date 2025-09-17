@@ -1,18 +1,25 @@
 <?php
 declare(strict_types=1);
 
+// Use __DIR__ for absolute paths to ensure files are found regardless of the calling context
 require_once(__DIR__ . '/config.inc.php');
-require_once(__DIR__ . '/Database.php');
-require_once(__DIR__ . '/DatabaseUtils.php');
-require_once(__DIR__ . '/StringUtils.php');
-require_once(__DIR__ . '/Constants.php');
+require_once(__DIR__ . '/phplib/error.inc.php');
+require_once(__DIR__ . '/phplib/Database.php');
+require_once(__DIR__ . '/phplib/DatabaseUtils.php');
+require_once(__DIR__ . '/phplib/StringUtils.php');
+require_once(__DIR__ . '/phplib/Constants.php');
+require_once(__DIR__ . '/phplib/database_functions.php');
+require_once(__DIR__ . '/phplib/session.inc.php');
+require_once(__DIR__ . '/phplib/stdlib.inc.php');
+require_once(__DIR__ . '/phplib/time.inc.php');
 
 /**
- * Initialize the system by setting up database connection and other core components
+ * Initialize the system
+ * Sets up database connection and error handling
  */
 function system_init(): void
 {
-    // Initialize database connection using environment-specific configuration
+    // Get database configuration
     $db = Database::getInstance(
         $GLOBALS['conf_mysql_host'],
         $GLOBALS['conf_mysql_user'],
@@ -20,7 +27,7 @@ function system_init(): void
         $GLOBALS['conf_mysql_db']
     );
 
-    // Set error reporting based on environment
+    // Set error handling based on environment
     if ($GLOBALS['conf_environment'] === 'development') {
         error_reporting(E_ALL);
         ini_set('display_errors', '1');
@@ -29,6 +36,9 @@ function system_init(): void
         ini_set('display_errors', '0');
     }
 
-    // Set timezone
+    // Set default timezone
     date_default_timezone_set('Europe/Berlin');
+
+    // Initialize session
+    Session::getInstance();
 }
