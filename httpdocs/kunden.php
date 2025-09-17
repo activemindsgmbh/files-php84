@@ -1,23 +1,24 @@
 <?php
+declare(strict_types=1);
 
-require_once ('.inc.php');
-require_once ('system.inc.php');
+require_once(__DIR__ . '/../include/config.inc.php');
+require_once(__DIR__ . '/../include/system.inc.php');
 
-system_init ();
+system_init();
 
-$query  = 'SELECT';
-$query .= ' kunde.anrede';
-$query .= ',kunde.kundennummer';
-$query .= ',kunde.name';
-$query .= ',kunde.ort';
-$query .= ',kunde.postleitzahl';
-$query .= ',kunde.strasse';
-$query .= ',kunde.email';
-$query .= ',kunde.vorname';
-$query .= ' FROM kunde';
-$query .= ' ORDER BY name,vorname,kundennummer';
-$rkunde = safe_mysql_query ($query);
+$query = 'SELECT ' .
+         'kunde.anrede, ' .
+         'kunde.kundennummer, ' .
+         'kunde.name, ' .
+         'kunde.vorname, ' .
+         'kunde.firma, ' .
+         'kunde.strasse, ' .
+         'kunde.plz, ' .
+         'kunde.ort, ' .
+         'kunde.land, ' .
+         'kunde.status ' .
+         'FROM kunde ' .
+         'ORDER BY kunde.name, kunde.vorname';
 
-require_once ("templates/html/kunden.html");
-
-?>
+$result = db_query($query);
+require_once(__DIR__ . '/templates/html/kunden.html');

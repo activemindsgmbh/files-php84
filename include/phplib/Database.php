@@ -1,49 +1,64 @@
 <?php
-declare(strict_types=1);
 
 class Database {
-    private static ?Database $instance = null;
-    private mysqli $mysqli;
+    private static $instance = null;
+    private $mysqli;
 
-    private function __construct(string $host, string $user, string $pass, string $db) {
+    private function __construct($host, $user, $pass, $db) {
         $this->mysqli = new mysqli($host, $user, $pass, $db);
         if ($this->mysqli->connect_error) {
-            throw new RuntimeException("Database connection failed: " . $this->mysqli->connect_error);
+            fatal_error('ERROR_DATABASE', $this->mysqli->connect_error, 'mysqli_connect');
         }
-        $this->mysqli->set_charset('utf8mb4');
+        $this->mysqli->set_charset('utf8');
     }
 
-    public static function getInstance(?string $host = null, ?string $user = null, ?string $pass = null, ?string $db = null): self {
+    public static function getInstance($host = null, $user = null, $pass = null, $db = null) {
         if (self::$instance === null) {
-            if ($host === null || $user === null || $pass === null || $db === null) {
-                throw new RuntimeException("Database connection parameters required");
-            }
             self::$instance = new self($host, $user, $pass, $db);
         }
         return self::$instance;
     }
 
-    public function query(string $query): mysqli_result|bool {
+    public function query($query) {
         $result = $this->mysqli->query($query);
         if ($result === false) {
-            throw new RuntimeException("Query failed: " . $this->mysqli->error);
+            fatal_error('ERROR_DATABASE', $this->mysqli->error, 'mysqli_query');
         }
         return $result;
     }
 
-    public function escapeString(string $string): string {
+    public function escapeString($string) {
         return $this->mysqli->real_escape_string($string);
     }
 
-    public function fetchObject(mysqli_result $result): ?object {
-        return $result->fetch_object();
+    public function fetchArray($result) {
+        return $result->fetch_array(MYSQLI_BOTH);
     }
 
-    public function numRows(mysqli_result $result): int {
+    public function fetchAssoc($result) {
+        return $result->fetch_assoc();
+    }
+
+    public function fetchRow($result) {
+        return $result->fetch_row();
+    }
+
+    public function numRows($result) {
         return $result->num_rows;
     }
 
-    public function affectedRows(): int {
+    public function affectedRows() {
         return $this->mysqli->affected_rows;
     }
+
+    public function lastInsertId() {
+        return $this->mysqli->insert_id;
+    }
+
+    public function close() {
+        if ($this->mysqli) {
+            $this->mysqli->close();
+        }
+    }
 }
+?>

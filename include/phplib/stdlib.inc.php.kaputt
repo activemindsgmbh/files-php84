@@ -1,0 +1,403 @@
+<?php
+
+function check_email ($email)
+{
+  if (eregi('^[-+_.,a-z0-9]+@(([a-z0-9]+([-a-z0-9]+[a-z0-9]|[a-z0-9]+)*\.)+[a-z]{2,})$', $email, $regs))
+  {
+    if (checkdnsrr($regs[1], 'ANY') === true)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+function check_image ($key, &$type, &$width, &$height, &$size)
+{
+  $type = '';
+  if (isset($_FILES[$key]) && $_FILES[$key]['error'] != UPLOAD_ERR_NO_FILE)
+  {
+    if ($_FILES[$key]['error'] != UPLOAD_ERR_OK)
+    {
+      return ($_FILES[$key]['error'] == UPLOAD_ERR_PARTIAL ? 'PARTIAL' : 'INTERNAL');
+    }
+    if ($_FILES[$key]['size'] == 0)
+    {
+      return 'INVALID';
+    }
+    if ($_FILES[$key]['tmp_name'] === '')
+    {
+      return 'INTERNAL';
+    }
+    if (($info = getimagesize($_FILES[$key]['tmp_name'])) === false)
+    {
+      return 'INTERNAL';
+    }
+    $width = $info[0];
+    $height = $info[1];
+    clearstatcache ();
+    $size = (int)@filesize($_FILES[$key]['tmp_name']);
+    switch ($info[2])
+    {
+      case IMAGETYPE_GIF:
+        $type = 'gif';
+        break;
+      case IMAGETYPE_JPEG:
+        $type = 'jpg';
+        break;
+      case IMAGETYPE_PNG:
+        $type = 'png';
+        break;
+      default:
+        return 'INVALID';
+    }
+  }
+  return '';
+}
+
+
+function check_referer ($strict = true)
+{
+  $host = (string)@$_SERVER['HTTP_HOST'];
+  $referer = (string)@$_SERVER['HTTP_REFERER'];
+  if ($host === '' || $referer === '')
+  {
+    return !$strict;
+  }
+  if (!strncasecmp($referer, "http://", 7))
+  {
+    $referer = substr ($referer, 7);
+  }
+  else if (!strncasecmp($referer, "https://", 8))
+  {
+    $referer = substr ($referer, 8);
+  }
+  else
+  {
+    return false;
+  }
+  $len = strlen ($host);
+  return (!strncasecmp($referer, $host, $len) && (strlen($referer) == $len || $referer[$len] == '/'));
+}
+
+
+function create_thumbnail ($path, $width, $height)
+{
+  $img = NULL;
+  $supported = imagetypes ();
+  if (!$img && ($supported & IMG_GIF))
+  {
+    $img = @imagecreatefromgif ($path);
+  }
+  if (!$img && ($supported & (IMG_JPG | IMG_JPEG)))
+  {
+    $img = @imagecreatefromjpeg ($path);
+  }
+  if (!$img && ($supported & IMG_PNG))
+  {
+    $img = @imagecreatefrompng ($path);
+  }
+  if (!$img)
+  {
+    return NULL;
+  }
+  $thm = imagecreatetruecolor ($width, $height);
+  if (!$thm)
+  {
+    return NULL;
+  }
+  if (!imagecopyresampled($thm, $img, 0, 0, 0, 0, $width, $height, imagesx($img), imagesy($img)))
+  {
+    return NULL;
+  }
+  return $thm;
+}
+
+
+function db2form ($str)
+{
+  if (get_magic_quotes_runtime())
+  {
+    return (string)(get_magic_quotes_gpc() ? stripslashes($str) : $str);
+  }
+  return (string)(get_magic_quotes_gpc() ? addslashes($str) : $str);
+}
+
+
+function decstr ($i)
+{
+  if (!isint($i))
+  {
+    $i = 0;
+  }
+  return sprintf ('%c%c%c%c', $i >> 24, $i >> 16, $i >> 8, $i);
+}
+
+
+function form_input ($str)
+{
+  return (string)(get_magic_quotes_gpc() ? stripslashes($str) : $str);
+}
+
+
+function form_value ($str, $nl2br = false)
+{
+  if ($nl2br)
+  {
+    return (string)nl2br(htmlspecialchars(get_magic_quotes_gpc() ? stripslashes($str) : $str));
+  }
+  return (string)htmlspecialchars(get_magic_quotes_gpc() ? stripslashes($str) : $str);
+}
+
+
+function init_wizard ()
+{
+  $wiz = NULL;
+  $wiz->step = 1;
+  $wiz->next = 1;
+  if ($_SERVER['REQUEST_METHOD'] == 'POST')
+  {
+    $wiz->step = trim (@$_POST['step']);
+    if (!isuint($wiz->step) || $wiz->step < 1)
+    {
+      $wiz->step = 1;
+    }
+    if (isset($_POST['next']) || isset($_POST['next_x']))
+    {
+      $wiz->next = $wiz->step + 1;
+    }
+    else if (isset($_POST['prev']) || isset($_POST['prev_x']))
+    {
+      $wiz->next = max ($wiz->step - 1, 1);
+    }
+    else
+    {
+      $wiz->next = $wiz->step;
+    }
+  }
+  return $wiz;
+}
+
+
+function isint ($var)
+{
+  return preg_match ('^[-+]?[0-9]+$^', $var);
+}
+
+
+function isuint ($var)
+{
+  return preg_match ('^\+?[0-9]+$^', $var);
+}
+
+
+function mime_encode ($s)
+{
+  $mime = false;
+  $ret = '';
+  $len = strlen ($s);
+  for ($i = 0; $i < $len; ++$i)
+  {
+    $c = ord ($s[$i]);
+    if ($c & 128)
+    {
+      $mime = true;
+      $ret .= sprintf ('=%02s', strtoupper(dechex($c)));
+    }
+    else
+    {
+      $ret .= $s[$i];
+    }
+  }
+  return ($mime ? "=?ISO-8859-1?Q?{$ret}?=" : $ret);
+}
+
+
+function parse_date ($var)
+{
+  if (preg_match('^([0-9]{1,2}) *[-/,;.: ] *([0-9]{1,2}) *[-/,;.: ] *([0-9]{1,4})$^', $var, $regs))
+  {
+    $d = (int)$regs[1];
+    $m = (int)$regs[2];
+    $y = (int)$regs[3];
+    if ($y < 10)
+    {
+      $y += 2000;
+    }
+    else if ($y < 100)
+    {
+      $y += 1900;
+    }
+    if (checkdate($m, $d, $y))
+    {
+      return ($y * 10000 + $m * 100 + $d);
+    }
+  }
+  return -1;
+}
+
+
+function parse_time ($var)
+{
+  if (ereg('^([0-9]{1,2}) *[-/,;.: ] *([0-9]{1,2}) *[-/,;.: ] *([0-9]{1,2})$', $var, $regs))
+  {
+    $h = (int)$regs[1];
+    $m = (int)$regs[2];
+    $s = (int)$regs[3];
+  }
+  else if (ereg('^([0-9]{1,2}) *[-/,;.: ] *([0-9]{1,2})$', $var, $regs))
+  {
+    $h = (int)$regs[1];
+    $m = (int)$regs[2];
+    $s = 0;
+  }
+  else if (ereg('^([0-9]{1,2})$', $var, $regs))
+  {
+    $h = (int)$regs[1];
+    $m = 0;
+    $s = 0;
+  }
+  else
+  {
+    return -1;
+  }
+  if ($h >= 0 && $h < 24 && $m >= 0 && $m < 60 && $s >= 0 && $s < 60)
+  {
+    return ($h * 10000 + $m * 100 + $s);
+  }
+  return -1;
+}
+
+
+function post_value ($key, $nl2br = false)
+{
+  return form_value (@$_POST[$key], $nl2br);
+}
+
+
+function redirect ($url = '')
+{
+  if (!eregi('^[a-z]+://.+', $url))
+  {
+    $tmp = $url;
+    $url = ($_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
+    $url .= $_SERVER['HTTP_HOST'];
+    if ($_SERVER['SERVER_PORT'] != 80 && $_SERVER['SERVER_PORT'] != 443)
+    {
+      $url .= ':' . $_SERVER['SERVER_PORT'];
+    }
+    $url .= ($tmp && $tmp[0] != '/' ? '/' : '') . $tmp;
+  }
+  header ("Location: $url");
+  exit;
+}
+
+
+function sendmail ($msg, $return_path = '')
+{
+	$body = '';
+	$header = '';
+	$subject = '';
+	$to = '';
+	$inbody = false;
+  $msgid = false;
+	$lines = explode ("\n", $msg);
+	foreach ($lines as $line)
+	{
+		if ($inbody)
+		{
+			$body .= $line . "\n";
+		}
+		else if ($line == '')
+		{
+			$inbody = true;
+		}
+		else if (!strncasecmp ($line, 'To:', 3))
+		{
+      $tmp = trim (substr($line, 3));
+      if (ereg('\<([^<]+)\>', $tmp, $reg))
+      {
+        $tmp = $reg[1];
+      }
+      if (check_email($tmp))
+      {
+  			$to = ($to ? ',' : '') . $tmp;
+      }
+		}
+		else if (!strncasecmp ($line, 'Subject:', 8))
+		{
+			$subject = trim (substr($line, 8));
+		}
+		else
+		{
+      if (!strncasecmp($line, 'Message-ID:', 11))
+      {
+        $msgid = true;
+      }
+			$header .= trim($line) . "\r\n";
+		}
+	}
+	if ($to && $subject && $body)
+	{
+    if (!$msgid)
+    {
+      $header .= 'Message-ID: <' . md5(uniqid(mt_rand(), true)) . '@' . $_SERVER['HTTP_HOST'] . ">\r\n";
+    }
+		return mail ($to, mime_encode($subject), wordwrap($body, 70), rtrim($header), $return_path ? "-f {$return_path}" : '');
+	}
+  return false;
+/*
+  $cmd = ini_get('sendmail_path');
+  if ($return_path)
+  {
+    $cmd .= " -r {$return_path}";
+  }
+  if ($fp = popen($cmd, 'w'))
+  {
+    fputs ($fp, 'Message-ID: <' . md5(uniqid(mt_rand(), true)) . ">\r\n");
+    fputs ($fp, $msg);
+    pclose ($fp);
+    return true;
+  }
+  return false;
+*/
+}
+
+
+function strdec ($s)
+{
+  if (strlen($s) >= 4)
+  {
+    return ((ord($s[0]) << 24) | (ord($s[1]) << 16) | (ord($s[2]) << 8) | ord($s[3]));
+  }
+  return 0;
+}
+
+
+function strfix ($str, $len, $align = 'L', $fill = ' ')
+{
+  if ($len < strlen($str))
+  {
+    return substr ($str, 0, $len);
+  }
+  return str_pad ($str, $len, $fill, $align == 'R' || $align == 'r' ? STR_PAD_LEFT : STR_PAD_RIGHT);
+}
+
+
+
+function write_image ($img, $path, $type, $quality = 85)
+{
+  switch ($type)
+  {
+    case 'gif':
+      return imagegif ($img, $path);
+    case 'jpg':
+      return imagejpeg ($img, $path, $quality);
+    case 'png':
+      return imagepng ($img, $path);
+  }
+  return false;
+}
+
+?>

@@ -1,70 +1,103 @@
 <?php
-declare(strict_types=1);
 
-/**
- * Time and date utility functions
- */
-
-/**
- * Get UNIX timestamp for a date
- * @param string $date Date string
- * @return int UNIX timestamp
- */
-function date2time(string $date): int
+function adjustdate (&$y, &$m, &$d)
 {
-    return (int)strtotime($date);
+  if ($m == 0 || $m > 12)
+  {
+    $m = 12;
+  }
+  switch ($m)
+  {
+    case 2:
+      if ($d > 29 && isleapyear($y))
+      {
+        $d = 29;
+      }
+      else if ($d > 28)
+      {
+        $d = 28;
+      }
+      break;
+    case 4:
+    case 6:
+    case 9:
+    case 11:
+      if ($d > 30)
+      {
+        $d = 30;
+      }
+      break;
+    default:
+      if ($d > 31)
+      {
+        $d = 31;
+      }
+  }
+  return ($y * 10000 + $m * 100 + $d);
 }
 
-/**
- * Format UNIX timestamp as date
- * @param int $time UNIX timestamp
- * @return string Formatted date
- */
-function time2date(int $time): string
+
+function advance_date ($date, $interval, $stop/*, $debug = false*/)
 {
-    return date('Y-m-d', $time);
+//if ($debug) echo "advance_date ($date, $interval, $stop, true)\n";
+  if (!isuint($interval) || $interval < 1 || !isuint($date) || !isuint($stop))
+  {
+//if ($debug && !isuint($interval)) echo "!isuint(interval = $interval)\n";
+//if ($debug && $interval < 1) echo "interval = $interval < 1\n";
+//if ($debug && !isuint($date)) echo "!isuint(date = $date)\n";
+//if ($debug && !isuint($stop)) echo "!isuint(stop = $stop)\n";
+    return 0;
+  }
+  if ($date > $stop)
+  {
+//if ($debug) echo "{$date} > {$stop}\n";
+    return $date;
+  }
+  if ($interval == 1)
+  {
+    $y = floor ($stop / 10000);
+    $m = floor ($stop / 100) % 100;
+  }
+  else
+  {
+    $y = floor ($date / 10000);
+    $m = floor ($date / 100) % 100;
+  }
+  $d = $date % 100;
+  $ymd = fixdate ($y, $m, $d);
+//if ($debug) echo "y = {$y}\n";
+//if ($debug) echo "m = {$m}\n";
+//if ($debug) echo "d = {$d}\n";
+//if ($debug) echo "ymd = {$ymd}\n";
+  while ($ymd <= $stop)
+  {
+//if ($debug) echo "loop\n";
+    $m += $interval;
+    while ($m > 12)
+    {
+      $m -= 12;
+      ++$y;
+    }
+    $ymd = fixdate ($y, $m, $d);
+//if ($debug) echo "y = {$y}\n";
+//if ($debug) echo "m = {$m}\n";
+//if ($debug) echo "d = {$d}\n";
+//if ($debug) echo "ymd = {$ymd}\n";
+  }
+  return $ymd;
 }
 
-/**
- * Format UNIX timestamp as date and time
- * @param int $time UNIX timestamp
- * @return string Formatted date and time
- */
-function time2datetime(int $time): string
+
+function fixdate ($y, $m, $d)
 {
-    return date('Y-m-d H:i:s', $time);
+  adjustdate ($y, $m, $d);
+  return ($y * 10000 + $m * 100 + $d);
 }
 
-/**
- * Get current timestamp
- * @return int Current UNIX timestamp
- */
-function now(): int
+
+function isleapyear ($y)
 {
-    return time();
+  return (($y % 4) == 0 && ($y % 100) != 0 || ($y % 400) == 0);
 }
 
-/**
- * Add days to a date
- * @param string $date Start date
- * @param int $days Days to add
- * @return string Resulting date
- */
-function add_days(string $date, int $days): string
-{
-    $time = date2time($date);
-    return time2date($time + ($days * 86400));
-}
-
-/**
- * Get days between two dates
- * @param string $date1 First date
- * @param string $date2 Second date
- * @return int Number of days
- */
-function days_between(string $date1, string $date2): int
-{
-    $time1 = date2time($date1);
-    $time2 = date2time($date2);
-    return (int)(($time2 - $time1) / 86400);
-}
+?>

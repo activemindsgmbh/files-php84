@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Rechnungslauf</h2>
+    <form action="" method="post" name="theForm">
+      Datum bis zu welchem f&auml;llige Positionen aufgelistet werden sollen
+      <input name="datum" type="text" value="<?=post_value('datum')?>" size="10" maxlength="13">
+      <input type="submit" value="Rechnungslauf starten">
+      <?php if(error('datum')=='EMPTY'){?><div class="errormsg">Datum fehlt</div>
+      <?php }else if(error('datum')=='INVALID'){?><div class="errormsg">Datum ist ung&uuml;ltig</div>
+      <?php }else if(error('datum')){?><div class="errormsg">unbekannter Fehler</div><?php }?>
+    </form>
+    <?php if($rrechnungen){?>
+    <table border="1">
+      <tr>
+        <th>Kd.-Nr.</th>
+        <th>Name / Firma</th>
+        <th>Rechnungsbetrag netto</th>
+        <th>W&auml;hrung</th>
+        <th>Link Rechnungsvorschau</th>
+      </tr>
+      <?php while($rechnung=mysql_fetch_object($rrechnungen)){?>
+      <tr>
+        <td><a href="/kundendaten.php?kunde=<?=urlencode($rechnung->kundennummer)?>"><?php echo htmlspecialchars($rechnung->kundennummer)?></a></td>
+        <td><?php echo htmlspecialchars($rechnung->name.($rechnung->vorname?', '.$rechnung->vorname:''))?></td>
+        <td align="right"><?php echo htmlspecialchars(number_format($rechnung->netto,2,',','.'))?></td>
+        <td><?php echo htmlspecialchars($rechnung->waehrung)?></td>
+        <td align="center"><a href="/rechnungsvorschau.php?kunde=<?php echo urlencode($rechnung->kundennummer)?>&datum=<?php echo urlencode(post_value('datum'))?>" target="_blank">Vorschau</a></td>
+      </tr>
+      <?php }?>
+    </table>
+    <?php }?>
+  </body>
+</html>

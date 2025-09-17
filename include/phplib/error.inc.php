@@ -1,55 +1,96 @@
 <?php
-declare(strict_types=1);
 
-/**
- * Error handling functions for PHP 8.4
- */
+$GLOBALS['error_inc_errors'] = array ();
+$GLOBALS['error_inc_fatal_error_handler'] = NULL;
 
-/**
- * Handle and log errors
- * @param int $errno Error number
- * @param string $errstr Error message
- * @param string $errfile File where error occurred
- * @param int $errline Line number where error occurred
- * @return bool
- */
-function error_handler(int $errno, string $errstr, string $errfile, int $errline): bool
+
+function clear_errors ()
 {
-    switch ($errno) {
-        case E_ERROR:
-        case E_PARSE:
-        case E_CORE_ERROR:
-        case E_COMPILE_ERROR:
-        case E_USER_ERROR:
-            $error_type = 'Fatal Error';
-            break;
-        case E_WARNING:
-        case E_CORE_WARNING:
-        case E_COMPILE_WARNING:
-        case E_USER_WARNING:
-            $error_type = 'Warning';
-            break;
-        case E_NOTICE:
-        case E_USER_NOTICE:
-            $error_type = 'Notice';
-            break;
-        default:
-            $error_type = 'Unknown';
-            break;
+  $GLOBALS['error_inc_errors'] = array ();
+}
+
+
+function error ($key = '')
+{
+  if (!isset($key) || $key === '')
+  {
+    return count($GLOBALS['error_inc_errors']);
+  }
+  if (array_key_exists($key, $GLOBALS['error_inc_errors']))
+  {
+    return $GLOBALS['error_inc_errors'][$key];
+  }
+  return '';
+}
+
+
+function errormsg ($key, $key2 = '')
+{
+  if (error($key))
+  {
+    $str = ($key2 ? $key2 : $key) . '::' . error($key);
+    echo @$GLOBALS['conf_error_prefix'];
+    if (is_array($GLOBALS['conf_errormsg']) && array_key_exists($str, $GLOBALS['conf_errormsg']))
+    {
+//      echo htmlspecialchars ($GLOBALS['conf_errormsg'][$str]);
+      echo $GLOBALS['conf_errormsg'][$str];
     }
+    else
+    {
+      echo htmlspecialchars ($str);
+    }
+    echo @$GLOBALS['conf_error_suffix'];
+  }
+}
 
-    error_log("$error_type: $errstr in $errfile on line $errline");
+
+function fatal_error ($err, $msg = '', $msg2 = '')
+{
+  if (!function_exists($GLOBALS['error_inc_fatal_error_handler']))
+  {
+    echo '<html>';
+    echo '<body>';
+    echo '<h1>fatal error</h1>';
+    echo "<h2>{$err}</h2>";
+    echo "<p>{$msg}</p>";
+    echo "<p>{$msg2}</p>";
+    echo '</body>';
+    echo '</html>';
+    exit;
+  }
+  call_user_func ($GLOBALS['error_inc_fatal_error_handler'], $err, $msg, $msg2);
+}
+
+
+function premise ($cond, $err, $msg = '')
+{
+  if ($cond == false)
+  {
+    fatal_error ($err, $msg);
+  }
+}
+
+
+function set_fatal_error_handler ($func)
+{
+  $GLOBALS['error_inc_fatal_error_handler'] = $func;
+}
+
+
+function set_error ($key, $err)
+{
+  $GLOBALS['error_inc_errors'][$key] = $err;
+}
+
+
+function set_error_if ($cond, $key, $err)
+{
+  if ($cond)
+  {
+    set_error ($key, $err);
     return true;
+  }
+  return false;
 }
 
-// Set error handler
-set_error_handler('error_handler');
-
-// Set error reporting based on environment
-if ($GLOBALS['conf_environment'] === 'development') {
-    error_reporting(E_ALL);
-    ini_set('display_errors', '1');
-} else {
-    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-    ini_set('display_errors', '0');
-}
+?>

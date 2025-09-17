@@ -1,0 +1,284 @@
+<?php
+require_once ('fpdf/fpdf.php');
+class PDF extends FPDF
+{
+  var $column_align = array ();
+  var $column_header = array ();
+  var $column_width = array ();
+  var $kunde = NULL;
+  var $padding = 1.0;
+  var $print_header = true;
+
+  function PDF ($kunde, $orientation = 'P', $unit = 'mm', $format = 'A4')
+  {
+    $this->kunde = $kunde;
+    $this->FPDF ($orientation, $unit, $format);
+    $this->AliasNbPages ();
+    $this->SetMargins (20, 10, 10);
+    $this->AddPage ();
+  }
+
+  function anschrift ()
+  {
+    $str = 'active minds GmbH · Felsenrech 17 · 66539 Neunkirchen';
+    $this->SetY (55);
+    $this->SetFont ('Arial', '', 7);
+    $this->Cell ($this->GetStringWidth($str), $this->FontSize, $str, 'B', 1);
+    $this->SetY ($this->GetY() + 2);
+    if ($this->kunde->anschrift !== '')
+    {
+      $str = $this->kunde->anschrift;
+    }
+    else
+    {
+      $str = $this->kunde->anrede . "\n";
+      $str .= ($this->kunde->vorname !== '' ? $this->kunde->vorname . ' ' : '') . $this->kunde->name . "\n";
+      $str .= $this->kunde->strasse . "\n";
+      $str .= $this->kunde->postleitzahl . ' ';
+			if ($this->kunde->land_code == 'DE')
+			{
+				$str .= $this->kunde->ort . "\n";
+			}
+			else
+			{
+				$str .= strtoupper ($this->kunde->ort) . "\n";
+				$str .= strtoupper ($this->kunde->land_name) . "\n";
+			}
+    }
+    $this->SetFont ('Arial', '', 10);
+    $this->MultiCell (90, $this->FontSize, utf8_decode($str));
+    $this->SetY ($this->GetY() + 20);
+  }
+
+  function falthilfe ()
+  {
+    $this->SetLineWidth (0.04);
+    $this->Line (0, 100, 5, 100);
+    $this->SetLineWidth (0.2);
+  }
+
+  function Footer ()
+  {
+    $this->SetY (-18);
+    $this->SetFont ('Arial', '', 9);
+    $this->Cell ($this->w - $this->lMargin - $this->rMargin, $this->FontSize, 'Seite ' . $this->PageNo() . ' / {nb}', 0, 1, 'R');
+    $this->SetY ($this->GetY() + 1);
+    $this->Line ($this->lMargin, $this->GetY(), $this->w - $this->rMargin, $this->GetY());
+    $this->SetY ($this->GetY() + 1);
+    $font_face = 'Arial';
+    $font_size = 8;
+    $this->SetFont ($font_face, 'B', $font_size);
+    $this->Write ($this->FontSize, 'Handelsregister: ');
+    $this->SetFont ($font_face, '', $font_size);
+    $this->Write ($this->FontSize, 'HRB 3881 · Amtsgericht Saarbrücken');
+    $this->SetFont ($font_face, 'B', $font_size);
+    $this->Write ($this->FontSize, '   Geschäftsführer: ');
+    $this->SetFont ($font_face, '', $font_size);
+    $this->Write ($this->FontSize, 'Christian Müller · Dirk Schaufert');
+    $this->Ln ();
+    $this->SetFont ($font_face, 'B', $font_size);
+    $this->Write ($this->FontSize, 'Steuernummer: ');
+    $this->SetFont ($font_face, '', $font_size);
+    $this->Write ($this->FontSize, '040/105/60220 · Finanzamt Völklingen');
+    $this->SetFont ($font_face, 'B', $font_size);
+    $this->Write ($this->FontSize, '   Umsatzsteuer-ID: ');
+    $this->SetFont ($font_face, '', $font_size);
+    $this->Write ($this->FontSize, 'DE 178 794 504');
+    if ($this->kunde->land == 'DE')
+		{
+	    $this->Ln ();
+			$this->SetFont ($font_face, 'B', $font_size);
+			$this->Write ($this->FontSize, 'Bankverbindung: ');
+			$this->SetFont ($font_face, '', $font_size);
+			$this->Write ($this->FontSize, 'Sparkasse Neunkirchen · IBAN DE33 5925 2046 0052 0101 04 · BIC SALADE51NKS');
+		}
+  }
+
+  function Header ()
+  {
+    $this->Image ($GLOBALS['conf_logo'], 20, 6, 0, 21);
+    $x = 88;
+    $y = 10;
+    $this->SetFont ('Arial', 'B', 11.5);
+    $this->Text ($x, $y, '');
+    $y += $this->FontSize + 2;
+//    $x2 = $x + ($this->w - $this->rMargin - $x) / 3;
+//    $x3 = $x + (($this->w - $this->rMargin - $x) / 3) * 2;
+    $x2 = $x + 29;
+    $x3 = $x2 + 38;
+    $this->SetFont ('Arial', 'B', 8);
+    $this->Text ($x, $y, 'active minds GmbH');
+    $this->Text ($x2, $y, 'Kontakt');
+    $this->Text ($x3, $y, 'Bankverbindung');
+    $y += $this->FontSize + 1;
+    $y2 = $y + $this->FontSize + 0.5;
+    $y3 = $y2 + $this->FontSize + 0.5;
+    $this->SetFont ('Arial', '', 8);
+    $this->Text ($x, $y, 'Felsenrech  17');
+    $this->Text ($x, $y2, '66539 Neunkirchen');
+    $delta = max ($this->GetStringWidth('Tel. '), $this->GetStringWidth('Fax. '), $this->getStringWidth('E-Mail '));
+    $this->Text ($x2, $y, 'Tel.');
+    $this->Text ($x2 + $delta, $y, '06821 309 35 50');
+    $this->Text ($x2, $y2, 'Fax.');
+    $this->Text ($x2 + $delta, $y2, '06821 309 35 49');
+    $this->Text ($x2, $y3, 'E-Mail');
+    $this->Text ($x2 + $delta, $y3, 'info@activeminds.de');
+    if ($this->kunde->land == 'CH')
+    {
+      $this->Text ($x3, $y, 'Sparkasse Neunkirchen');
+      $this->Text ($x3, $y2, 'IBAN DE33 5925 2046 0052 0101 04');
+      $delta = max ($this->GetStringWidth('Kontonummer '), $this->GetStringWidth('Clearing-Nr. '));
+/*
+      if ($this->kunde->waehrung == 'CHF')
+      {
+        $this->Text ($x3, $y3, 'Kontonummer 85-196258-9');
+      }
+      else
+      {
+        $this->Text ($x3, $y3, 'Kontonummer 91-420910-8');
+      }
+*/
+      $this->Text ($x3, $y3, 'BIC SALADE51NKS');
+      $y4 = $y3 + $this->FontSize + 0.5;
+      $this->Text ($x3, $y4, '');
+      $this->SetY ($y4 + 4);
+    }
+/*
+    else if ($this->kunde->land == 'DE')
+    {
+      $this->Text ($x3, $y, 'GLS Bank eG');
+      $delta = max ($this->GetStringWidth('Kontonummer '), $this->GetStringWidth('Bankleitzahl '));
+      $this->Text ($x3, $y2, 'Kontonummer');
+      $this->Text ($x3 + $delta, $y2, '6017545100');
+      $this->Text ($x3, $y3, 'Bankleitzahl');
+      $this->Text ($x3 + $delta, $y3, '430 609 67');
+      $this->SetY ($y3 + 4);
+    }
+*/
+    else
+    {
+      $this->Text ($x3, $y, 'Sparkasse Neunkirchen');
+      $delta = max ($this->GetStringWidth('IBAN '), $this->GetStringWidth('BIC '));
+      $this->Text ($x3, $y2, 'IBAN');
+      $this->Text ($x3 + $delta, $y2, 'DE33 5925 2046 0052 0101 04');
+      $this->Text ($x3, $y3, 'BIC');
+      $this->Text ($x3 + $delta, $y3, 'SALADE51NKS');
+
+      $this->SetY ($y3 + 4);
+    }
+    $this->Line ($this->lMargin, $this->GetY(), $this->w - $this->rMargin, $this->GetY());
+    $this->SetY ($this->GetY() + 4);
+    if ($this->print_header && $this->PageNo() > 1)
+    {
+      $this->tableHeader ();
+    }
+  }
+  
+  function lineHeight ($sz)
+  {
+    return ($sz * 25.4) / 72 + 0.1;
+  }
+  
+  function numLines ($str, $width)
+  {
+    $cw = &$this->CurrentFont["cw"];
+    $maxw = ($width - 2 * $this->cMargin) * 1000 / $this->FontSize;
+    $len = strlen ($str);
+    $nl = 1;
+    $curw = 0;
+    $white = -1;
+    for ($i = 0; $i < $len; ++$i)
+    {
+      $c = $str[$i];
+      if ($c == "\n")
+      {
+        ++$nl;
+        $curw = 0;
+        $white = -1;
+      }
+      else
+      {
+        if ($c == ' ')
+        {
+          $white = $i;
+        }
+        $curw += $cw[$c];
+        if ($curw > $maxw)
+        {
+          if ($white != -1)
+          {
+            $i = $white;
+          }
+          ++$nl;
+          $curw = 0;
+          $white = -1;
+        }
+      }
+    }
+    return $nl;
+  }
+  
+  function Row ($cells, $border = 0)
+  {
+    $maxh = 0;
+    for ($i = 0; $i < count($cells); ++$i)
+    {
+      $maxh = max ($maxh, $this->FontSize * $this->numLines($cells[$i], $this->column_width[$i]));
+    }
+    $maxh += 2 * $this->padding;
+    if ($maxh + $this->GetY () > $this->PageBreakTrigger)
+    {
+      $this->AddPage ();
+    }
+    for ($i = 0; $i < count($cells); ++$i)
+    {
+      $x = $this->GetX ();
+      $y = $this->GetY ();
+      $this->SetXY ($x, $y + $this->padding);
+      if ($border !== 0 && $border !== '')
+      {
+        $b = (stripos($border, 'B') !== false);
+        $l = (stripos($border, 'L') !== false);
+        $r = (stripos($border, 'R') !== false);
+        $t = (stripos($border, 'T') !== false);
+        if ($border === 1 || $b && $l && $r && $t)
+        {
+          $this->Rect ($x, $y, $this->column_width[$i], $maxh);
+        }
+        else
+        {
+          if ($b)
+          {
+            $this->Line ($x, $y + $maxh, $x + $this->column_width[$i], $y + $maxh);
+          }
+          if ($l)
+          {
+            $this->Line ($x, $y, $x, $y + $maxh);
+          }
+          if ($r)
+          {
+            $this->Line ($x + $this->column_width[$i], $y, $x + $this->column_width[$i], $y + $maxh);
+          }
+          if ($t)
+          {
+            $this->Line ($x, $y, $x + $this->column_width[$i], $y);
+          }
+        }
+      }
+      $this->MultiCell ($this->column_width[$i], $this->FontSize, $cells[$i], 0, $this->column_align[$i], 0);
+      $this->SetXY ($x + $this->column_width[$i], $y);
+    }
+    $this->Ln ($maxh);
+  }
+
+  function tableHeader ()
+  {
+    $this->SetFont ('Arial', 'B', 9);
+    $this->SetLineWidth (0.05);
+    $this->Row ($this->column_header, 1, $this->padding);
+    $this->SetLineWidth (0.2);
+    $this->SetFont ('Arial', '', 9);
+  }
+};
+
+?>

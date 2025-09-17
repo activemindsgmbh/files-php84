@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+		<style type="text/css">
+		table, td {
+			border: none;
+		}
+		</style>
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Kostenstellen</h2>
+    <?php if(error()){?><div style="color:#F00;font-family:Courier New;font-size:48pt;font-weight:bold">Fehler</div><?php }?>
+    <form action="" method="post" name="theForm">
+			<input name="edit" type="hidden" value="1">
+			<?php if(mysql_num_rows($kostenstellen)){?>
+			<table border="0" cellpadding="2" cellspacing="0">
+				<?php while($kostenstelle=mysql_fetch_object($kostenstellen)){?>
+				<tr>
+					<td><?php echo htmlspecialchars($kostenstelle->name)?></td>
+					<td>
+						<input name="comment_<?php echo (int)$kostenstelle->id?>" type="text" value="<?php echo post_value('comment_'.(int)$kostenstelle->id)?>" size="48" maxlength="255">
+					</td>
+				</tr>
+				<?php }?>
+			</table>
+      <input type="submit" value="aktualisieren">
+			<?php }?>
+		</form>
+		<h3>Neue Kostenstelle</h3>
+    <form action="" method="post" name="theForm">
+			<div>Kostenstelle</div>
+			<div><input name="name" type="text" value="<?php echo post_value('name')?>" size="16" maxlength="32"></div>
+      <?php errormsg('kostenstelle.name')?>
+			<div>Beschreibung</div>
+			<div><input name="comment" type="text" value="<?php echo post_value('comment')?>" size="48" maxlength="255"></div>
+      <?php errormsg('kostenstelle.comment')?>
+      </table>
+      <input type="submit" value="hinzuf&uuml;gen">
+    </form>
+  </body>
+</html>

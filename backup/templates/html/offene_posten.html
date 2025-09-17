@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Offene Posten</h2>
+    <?php if(mysql_num_rows($rrechnungen)<1){?>
+    <p>
+      keine offenen Posten
+    </p>
+    <?php
+    }
+    else
+    {
+//			if (!$kunde)
+//			{
+				$sum = array ();
+				while ($rechnung = mysql_fetch_object($rrechnungen))
+				{
+					if (array_key_exists($rechnung->waehrung, $sum))
+					{
+						$sum[$rechnung->waehrung] += ($rechnung->forderung - $rechnung->zahlung);
+					}
+					else
+					{
+						$sum[$rechnung->waehrung] = $rechnung->forderung - $rechnung->zahlung;
+					}
+				}
+				mysql_data_seek ($rrechnungen, 0);
+				echo '<p>';
+				foreach ($sum as $currency => $amount)
+				{
+					echo '<b>Summe:</b> ' . number_format($amount,2,',','.') . ' ' . htmlspecialchars($currency) . '<br>';
+				}
+				echo '</p>';
+//			}
+//			$sum = array ();
+      $header = 2;
+      while (1)
+      {
+				$rechnung = mysql_fetch_object ($rrechnungen);
+        if (!$kunde || $kunde->kundennummer != @$rechnung->kunde)
+        {
+          if ($kunde)
+          {
+/*
+						if (isset($sum))
+						{
+							foreach ($sum as $currency => $amount)
+							{
+								echo '<tr>';
+								echo '<td colspan="4"></td>';
+								echo '<td><b>' . number_format($amount['forderung'],2,',','.') . ' ' . htmlspecialchars($currency) . '</b></td>';
+								echo '<td><b>' . ($amount['zahlung'] > 0 ? (number_format($amount['zahlung'],2,',','.') . ' ' . htmlspecialchars($currency)) : '') . '</b></td>';
+								echo '<td align="right" colspan="3"><b>' . number_format($amount['forderung']-$amount['zahlung'],2,',','.') . ' ' . htmlspecialchars($currency) . '</b></td>';
+								echo '</tr>';
+							}
+						}
+*/
+            echo '</table><p>&nbsp;</p>';
+          }
+					if ($rechnung)
+					{
+//						$sum = array ();
+          	$header = 1;
+          	$kunde = read_kunde ($rechnung->kunde);
+          	if ($kunde)
+          	{
+            	$query  = 'SELECT COUNT(*) FROM rechnung';
+            	$query .= ' WHERE kunde=' . (int)$kunde->kundennummer;
+            	$query .= ' AND status!=\'ERLEDIGT\'';
+            	$query .= ' AND faellig<=CURDATE()';
+            	$res = safe_mysql_query ($query);
+            	$row = mysql_fetch_row ($res);
+            	$faellig = (int)$row[0];
+          	}
+					}
+        }
+				if (!$rechnung)
+				{
+					break;
+				}
+        if ($header && $kunde)
+        {
+          if ($header == 1)
+          {
+    ?>
+    <h3>
+      [ <?php echo htmlspecialchars($kunde->kundennummer)?> ]
+      <a href="/kundendaten.php?kunde=<?php echo urlencode($kunde->kundennummer)?>"><?php echo htmlspecialchars($kunde->name);if($kunde->vorname)echo', '.htmlspecialchars($kunde->vorname)?></a>
+    </h3>
+    <?php
+          }
+          if ($faellig > 0)
+          {
+    ?>
+    <form action="/offene_posten.php?kunde=<?php echo urlencode($kunde->kundennummer)?>" method="post">
+      <input name="datum" type="text" value="<?php echo post_value('datum')?>" size="10" maxlength="13">
+      <input name="submit" type="submit" value="Mahnung erstellen">
+      <?php if(error('datum')=='EMPTY'){?><div class="errormsg">Datum fehlt</div>
+      <?php }else if(error('datum')=='INVALID'){?><div class="errormsg">Datum ist ung&uuml;ltig</div>
+      <?php }else if(error('datum')){?><div class="errormsg">unbekannter Fehler</div><?php }?>
+    </form>
+    <?php
+          }
+    ?>
+    <table border="1">
+      <tr>
+        <th>Nummer</th>
+        <th>Datum</th>
+        <th>F&auml;lligkeitsdatum</th>
+        <th>Status</th>
+        <th>Forderung</th>
+        <th>bezahlt</th>
+        <th>PDF (Kunde)</th>
+        <th>PDF (intern)</th>
+        <th>bearbeiten</th>
+      </tr>
+    <?php
+          $header = 0;
+        }
+/*
+				if (array_key_exists($rechnung->waehrung, $sum))
+				{
+					$sum[$rechnung->waehrung]['forderung'] += $rechnung->forderung;
+					$sum[$rechnung->waehrung]['zahlung'] += $rechnung->zahlung;
+				}
+				else
+				{
+					$sum[$rechnung->waehrung] = array ();
+					$sum[$rechnung->waehrung]['forderung'] = $rechnung->forderung;
+					$sum[$rechnung->waehrung]['zahlung'] = $rechnung->zahlung;
+				}
+*/
+    ?>
+      <tr>
+        <td><?php echo htmlspecialchars($rechnung->id)?></td>
+        <td><?php echo htmlspecialchars($rechnung->datum)?></td>
+        <td><?php echo htmlspecialchars($rechnung->faellig)?></td>
+        <td><?php echo htmlspecialchars($rechnung->status)?></td>
+        <td><?php echo htmlspecialchars(number_format($rechnung->forderung,2,',','.').' '.$rechnung->waehrung)?></td>
+        <td><?php if($rechnung->zahlung>0)echo htmlspecialchars(number_format($rechnung->zahlung,2,',','.').' '.$rechnung->waehrung)?></td>
+        <td><a href="<?php echo htmlspecialchars($GLOBALS['conf_url_rechnung_kunde'])?>/<?php echo htmlspecialchars($rechnung->id)?>.pdf">klick</a></td>
+        <td><a href="<?php echo htmlspecialchars($GLOBALS['conf_url_rechnung_intern'])?>/<?php echo htmlspecialchars($rechnung->id)?>.pdf">klick</a></td>
+        <td><a href="/rechnung.php?id=<?php echo urlencode($rechnung->id)?>">klick</a></td>
+      </tr>
+    <?php
+      }
+    }
+    ?>
+  </body>
+</html>

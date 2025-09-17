@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h1>[&nbsp;<?php echo htmlspecialchars($artikel->artikelnummer)?>&nbsp;]&nbsp;<a href="/artikeldaten.php?id=<?php echo urlencode($artikel->id)?>"><?php echo htmlspecialchars($artikel->kurztext)?></a></h1>
+    <h2>Artikelupdates</h2>
+    <p>
+      Preis: <?php echo htmlspecialchars(number_format($artikel->preis,2,',','.'))?><br>
+      Setup: <?php echo htmlspecialchars(number_format($artikel->setup,2,',','.'))?>
+    </p>
+    <form action="" method="post">
+      <table>
+        <?php
+        reset ($_POST['preis']);
+        reset ($_POST['setup']);
+        reset ($_POST['termin']);
+        $index = 0;
+        while (1)
+        {
+          if (!(($preis = each($_POST['preis'])) && ($setup = each($_POST['setup'])) && ($termin = each ($_POST['termin']))))
+          {
+            break;
+          }
+          if ($preis[1] !== '' || $setup[1] !== '' || $termin[1] !== '')
+          {
+        ?>
+        <tr>
+          <td>
+            Datum: <input name="termin[]" type="text" value="<?php echo form_value($termin[1])?>" size="10" maxlength="16">
+            Preis: <input name="preis[]" type="text" value="<?php echo form_value($preis[1])?>" size="10" maxlength="13">
+            Setup: <input name="setup[]" type="text" value="<?php echo form_value($setup[1])?>" size="10" maxlength="13">
+            <?php errormsg('artikelupdate.termin['.$index.']','artikelupdate.termin')?>
+            <?php errormsg('artikelupdate.preis['.$index.']','artikelupdate.preis')?>
+            <?php errormsg('artikelupdate.setup['.$index.']','artikelupdate.setup')?>
+          </td>
+        </tr>
+        <?php
+          }
+          ++$index;
+        }
+        ?>
+        <tr>
+          <td>
+            Datum: <input name="termin[]" type="text" value="" size="10" maxlength="13">
+            Preis: <input name="preis[]" type="text" value="" size="10" maxlength="13">
+            Setup: <input name="setup[]" type="text" value="" size="10" maxlength="13">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Datum: <input name="termin[]" type="text" value="" size="10" maxlength="13">
+            Preis: <input name="preis[]" type="text" value="" size="10" maxlength="13">
+            Setup: <input name="setup[]" type="text" value="" size="10" maxlength="13">
+          </td>
+        </tr>
+      </table>
+      <input type="submit" value="speichern">
+      <a href="/artikeldaten.php?id=<?php echo urlencode($artikel->id)?>"><input type="button" value="zum Artikel"></a>
+    </form>
+  </body>
+</html>

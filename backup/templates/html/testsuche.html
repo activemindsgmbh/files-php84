@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>testsuche</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="/default.css">
+  </head>
+  <body>
+    <?php @include('header.inc.html')?>
+    <h2>Kunde suchen</h2>
+    <form action="/testsuche.php" method="post">
+      <p>
+        Kunde
+        <input name="pattern" type="text" value="<?php echo post_value('pattern')?>" size="24" maxlength="255">
+        <input name="send" type="submit" value="Kunde anzeigen">
+      </p>
+    </form>
+    <?php if(mysql_num_rows($rkunde)){?>
+    <div>&nbsp;</div>
+    <table border="1">
+      <tr>
+
+        <th>Kunde</th>
+     
+
+
+      </tr>
+      <?php while($rkunde=mysql_fetch_object($rkunde)){?>
+      <tr>
+       
+        <td><a href="/kundendaten.php?kunde=<?php echo urlencode($rkunde->kundennummer)?>"><?php echo htmlspecialchars($rkunde->name);if($rkunde->vorname)echo', '.htmlspecialchars($rkunde->vorname)?></a></td>
+
+  
+  
+
+      </tr>
+      <?php }?>
+    </table>
+    <?php }?>
+  </body>
+</html>
